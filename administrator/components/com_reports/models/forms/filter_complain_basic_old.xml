@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldpath="administrator/components/com_prj/models/fields/">
+    <fields name="filter">
+        <field
+                name="search"
+                type="text"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                hint="COM_REPORTS_FILTER_ITEM"
+                autocomplete="off"
+                class="js-stools-search-string"
+        />
+        <field
+                name="projects"
+                type="Project"
+                label="COM_REPORTS_FILTER_PROJECTS"
+                description="COM_REPORTS_FILTER_PROJECTS"
+                multiple="true"
+                onchange="this.form.submit();"
+        />
+        <field
+                name="manager"
+                type="Manager"
+                label="COM_REPORTS_FILTER_MANAGER"
+                description="COM_REPORTS_FILTER_MANAGER"
+                onchange="this.form.submit();"
+        >
+                <option value="">COM_REPORTS_FILTER_MANAGER</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field
+                name="fullordering"
+                type="list"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                onchange="this.form.submit();"
+                default="title asc"
+        >
+            <option value="">JGLOBAL_SORT_BY</option>
+        </field>
+        <field
+                name="limit"
+                type="limitbox"
+                class="input-mini"
+                default="0"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>
