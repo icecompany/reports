@@ -16,7 +16,9 @@ class ReportsViewComplain_basic_old extends HtmlView
         $this->filterForm = $this->get('FilterForm');
         $this->activeFilters = $this->get('ActiveFilters');
 
-        $this->filterForm->setValue('projects', 'filter', $this->state->get('filter.projects')); //Автозаполнение фильтров
+        //Автозаполнение фильтров
+        $this->filterForm->setValue('projects', 'filter', $this->state->get('filter.projects'));
+        $this->filterForm->setValue('date', 'filter', $this->state->get('filter.date'));
 
         // Show the toolbar
         $this->toolbar();

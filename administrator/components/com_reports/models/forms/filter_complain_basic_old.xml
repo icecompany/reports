@@ -11,6 +11,16 @@
                 class="js-stools-search-string"
         />
         <field
+                name="date"
+                type="calendar"
+                filter="none"
+                label="COM_REPORTS_FILTER_DATE"
+                description="COM_REPORTS_FILTER_DATE"
+                hint="COM_REPORTS_FILTER_DATE"
+                format="%d.%m.%Y"
+                onchange="this.form.submit();"
+        />
+        <field
                 name="projects"
                 type="Project"
                 label="COM_REPORTS_FILTER_PROJECTS"
@@ -25,7 +35,7 @@
                 description="COM_REPORTS_FILTER_MANAGER"
                 onchange="this.form.submit();"
         >
-                <option value="">COM_REPORTS_FILTER_MANAGER</option>
+            <option value="">COM_REPORTS_FILTER_MANAGER</option>
         </field>
     </fields>
     <fields name="list">

@@ -8,6 +8,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 
 HTMLHelper::_('stylesheet', 'com_reports/style.css', array('version' => 'auto', 'relative' => true));
 HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'relative' => true));
+//var_dump($this->items['items']);
 ?>
 <div class="row-fluid">
     <div id="j-sidebar-container" class="span2">
