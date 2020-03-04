@@ -28,7 +28,7 @@ class ReportsModelComplain_basic_old extends ListModel
         $query = $this->_db->getQuery(true);
         $date = JDate::getInstance($this->getState('filter.date'));
         $query
-            ->select("c.prjID as projectID")
+            ->select("c.prjID as projectID, count(ual.id) as contracts")
             ->from("#__prj_user_action_log ual")
             ->leftJoin("#__prj_contracts c on c.id = ual.itemID")
             ->leftJoin("#__prj_projects p on p.id = c.prjID")
@@ -44,11 +44,7 @@ class ReportsModelComplain_basic_old extends ListModel
         $manager = $this->getState('filter.manager');
         if (is_numeric($manager)) {
             $query
-                ->where("c.managerID = {$this->_db->q($manager)}")
-                ->select("count(ual.id) as contracts");
-        }
-        else {
-            $query->select("count(ual.id) + if(c.prjID = 5, 2042, 0) as contracts");
+                ->where("c.managerID = {$this->_db->q($manager)}");
         }
 
         return $query;
@@ -112,6 +108,26 @@ class ReportsModelComplain_basic_old extends ListModel
             ->where("c.dat <= if(p.date_end < {$this->_db->q($date->toSql())}, date_add({$this->_db->q($date->toSql())}, interval -1 year), {$this->_db->q($date)})")
             ->where("c.status = 1 and c.prjID in ({$projects})")
             ->group("c.prjID, a.currency");
+        $manager = $this->state->get('filter.manager');
+        if (is_numeric($manager)) {
+            $query->where("c.managerID = {$this->_db->q($manager)}");
+        }
+        $items = $this->_db->setQuery($query)->loadAssocList();
+        $result = array();
+        foreach ($items as $item) {
+            if (!empty($item['currency'])) $result[$item['prjID']][$item['currency']] = number_format((float) $item['amount'], 2, '.', ' ');
+        }
+        return $result;
+    }
+
+    private function getSquares(string $date, array $projects): array
+    {
+        $date = JDate::getInstance($date);
+        $query = $this->_db->getQuery(true);
+        $projects = implode(", ", $projects);
+        $query
+            ->select("sum(s.value) as cnt")
+            ->from("#__prj_stat_v2 s");
         $manager = $this->state->get('filter.manager');
         if (is_numeric($manager)) {
             $query->where("c.managerID = {$this->_db->q($manager)}");
