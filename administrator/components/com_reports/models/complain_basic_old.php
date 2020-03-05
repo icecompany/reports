@@ -60,11 +60,13 @@ class ReportsModelComplain_basic_old extends ListModel
         $projects = $pm->getItems();
         $dogovors = $this->getContracts(JDate::getInstance($filter_date)->format("Y-m-d"), $filter_projects);
         $amounts = $this->getContractsAmounts(JDate::getInstance($filter_date)->format("Y-m-d"), $filter_projects);
+        $squares = $this->getSquares(JDate::getInstance($filter_date)->format("Y-m-d"), $filter_projects);
         foreach ($items as $item) {
             if (!isset($result['items'][$item->projectID])) $result['items'][$item->projectID] = array();
             $result['items'][$item->projectID]['contracts'] = $item->contracts;
             $result['items'][$item->projectID]['dogovors'] = $dogovors[$item->projectID];
             $result['items'][$item->projectID]['amounts'] = $amounts[$item->projectID];
+            $result['items'][$item->projectID]['squares'] = $squares[$item->projectID];
         }
         $result['projects'] = $projects['items'];
 
@@ -122,12 +124,22 @@ class ReportsModelComplain_basic_old extends ListModel
 
     private function getSquares(string $date, array $projects): array
     {
+        $price_items = array(
+            21 => 'pav', 22 => 'pav', 25 => 'pav', 23 => 'open', 24 => 'open', 26 => 'open',
+            3683 => 'pav', 3684 => 'pav', 3687 => 'pav', 3685 => 'open', 3686 => 'open', 3688 => 'open',
+        );
+        $ids = implode(", ", [21, 22, 23, 24, 25, 26, 3683, 3684, 3685, 3686, 3687, 3688]);
         $date = JDate::getInstance($date);
         $query = $this->_db->getQuery(true);
         $projects = implode(", ", $projects);
         $query
-            ->select("sum(s.value) as cnt")
-            ->from("#__prj_stat_v2 s");
+            ->select("c.prjID, s.itemID, sum(s.value) as square")
+            ->from("#__prj_stat_v2 s")
+            ->leftJoin("#__prj_contracts c on c.id = s.contractID")
+            ->leftJoin("#__prj_projects p on p.id = c.prjID")
+            ->where("c.dat <= if(p.date_end < {$this->_db->q($date->toSql())}, date_add({$this->_db->q($date->toSql())}, interval -1 year), {$this->_db->q($date)})")
+            ->where("s.itemID in ({$ids}) and c.prjID in ({$projects}) and c.status = 1")
+            ->group("c.prjID, s.itemID");
         $manager = $this->state->get('filter.manager');
         if (is_numeric($manager)) {
             $query->where("c.managerID = {$this->_db->q($manager)}");
@@ -135,7 +147,8 @@ class ReportsModelComplain_basic_old extends ListModel
         $items = $this->_db->setQuery($query)->loadAssocList();
         $result = array();
         foreach ($items as $item) {
-            if (!empty($item['currency'])) $result[$item['prjID']][$item['currency']] = number_format((float) $item['amount'], 2, '.', ' ');
+            if (!isset($result[$item['prjID']][$price_items[$item['itemID']]])) $result[$item['prjID']][$price_items[$item['itemID']]] = 0;
+            $result[$item['prjID']][$price_items[$item['itemID']]] += (float) $item['square'];
         }
         return $result;
     }

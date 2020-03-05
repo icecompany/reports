@@ -34,3 +34,15 @@ $ii = $this->state->get('list.start', 0);
         <td><?php echo $this->items['items'][$project['id']]['amounts']['eur'] ?? '';?></td>
     <?php endforeach; ?>
 </tr>
+<tr>
+    <td><?php echo JText::sprintf('COM_REPORTS_HEAD_COMPLAIN_BASIC_OLD_SQUARES_PAV');?></td>
+    <?php foreach ($this->items['projects'] as $project) :?>
+        <td><?php echo $this->items['items'][$project['id']]['squares']['pav'] ?? '';?></td>
+    <?php endforeach; ?>
+</tr>
+<tr>
+    <td><?php echo JText::sprintf('COM_REPORTS_HEAD_COMPLAIN_BASIC_OLD_SQUARES_OPEN');?></td>
+    <?php foreach ($this->items['projects'] as $project) :?>
+        <td><?php echo $this->items['items'][$project['id']]['squares']['open'] ?? '';?></td>
+    <?php endforeach; ?>
+</tr>
