@@ -8,6 +8,7 @@ $ii = $this->state->get('list.start', 0);
         <td><?php echo ++$ii;?></td>
         <td><?php echo $company['company'];?></td>
         <td><?php echo $company['manager'];?></td>
+        <td><?php echo $this->items['stands'][$companyID];?></td>
         <td><?php echo $company['site'];?></td>
         <td><?php echo $this->items['calculate'][$companyID] ?? 0;?></td>
         <td><?php echo $this->items['welcome_automatic'][$companyID]['pavilion'] ?? 0;?></td>

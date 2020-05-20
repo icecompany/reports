@@ -31,6 +31,7 @@ class ReportsModelWelcome extends ListModel
             ->select("u.name as manager, e.site")
             ->select("ci.itemID, ci.value")
             ->select("i.title as item, i.square_type, i.type")
+            ->select("c.id as contractID")
             ->from("#__mkv_contract_items ci")
             ->leftJoin("#__mkv_price_items i on i.id = ci.itemID")
             ->leftJoin("#__mkv_price_sections ps on ps.id = i.sectionID")
@@ -56,11 +57,13 @@ class ReportsModelWelcome extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'companies' => [], 'price' => [], 'welcome_manual' => [], 'welcome_automatic' => [], 'calculate' => []];
+        $result = ['items' => [], 'companies' => [], 'price' => [], 'welcome_manual' => [], 'welcome_automatic' => [], 'calculate' => [], 'stands' => []];
         $items = parent::getItems();
+        $ids = [];
 
         foreach ($items as $item) {
             $arr = [];
+            if (!in_array($item->contractID, $ids) && $item->contractID != null) $ids[] = $item->contractID;
             $arr['company'] = $item->company;
             $arr['site'] = $item->site;
             $manager = explode(' ', $item->manager);
@@ -102,8 +105,18 @@ class ReportsModelWelcome extends ListModel
                 }
             }
         }
-
+        $result['stands'] = $this->getStands($ids ?? []);
         return $result;
+    }
+
+    private function getStands(array $contractIDs = []): array
+    {
+        if (empty($contractIDs)) return [];
+        JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_contracts/models");
+        $model = JModelLegacy::getInstance('StandsLight', 'ContractsModel', ['contractIDs' => $contractIDs, 'byCompanyID' => true, 'byContractID' => false, 'ignore_request' => true]);
+        $stands = $model->getItems();
+        foreach (array_keys($stands) as $companyID) $stands[$companyID] = implode(', ', $stands[$companyID]);
+        return $stands;
     }
 
     private function getPriceID(int $projectID): int
