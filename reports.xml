@@ -64,6 +64,7 @@
 			<filename>config.xml</filename>
 			<filename>controller.php</filename>
 			<filename>LICENSE.txt</filename>
+			<filename>passwd.php</filename>
 			<folder>controllers</folder>
 			<folder>helpers</folder>
 			<folder>language</folder>
