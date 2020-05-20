@@ -57,53 +57,46 @@ class ReportsModelWelcome extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'companies' => [], 'price' => [], 'welcome_manual' => [], 'welcome_automatic' => [], 'calculate' => [], 'stands' => []];
+        $result = ['items' => [], 'price' => [], 'stands' => [], 'total' => ['price' => [], 'calculate' => 0]];
         $items = parent::getItems();
         $ids = [];
 
         foreach ($items as $item) {
-            $arr = [];
             if (!in_array($item->contractID, $ids) && $item->contractID != null) $ids[] = $item->contractID;
-            $arr['company'] = $item->company;
-            $arr['site'] = $item->site;
-            $manager = explode(' ', $item->manager);
-            $arr['manager'] = $manager[0];
-            if (!isset($result['companies'][$item->companyID])) $result['companies'][$item->companyID] = $arr;
             if (!isset($result['price'][$item->itemID])) $result['price'][$item->itemID] = $item->item;
-            if (!isset($result['items'][$item->companyID][$item->itemID])) $result['items'][$item->companyID][$item->itemID] = 0;
-            $result['items'][$item->companyID][$item->itemID] += $item->value;
-            if ($item->type === 'welcome') {
-                if (!isset($result['welcome_manual'][$item->companyID])) $result['welcome_manual'][$item->companyID] = 0;
-                $result['welcome_manual'][$item->companyID] += $item->value;
+            if (!isset($result['items'][$item->companyID])) {
+                $result['items'][$item->companyID]['company'] = $item->company;
+                $result['items'][$item->companyID]['site'] = $item->site;
+                $result['items'][$item->companyID]['site_link'] = JHtml::link(JRoute::_($item->site), $item->site, ['target' => '_blank']);
+                $manager = explode(' ', $item->manager);
+                $arr['manager'] = $manager[0];
+                $result['items'][$item->companyID]['price'] = [];
             }
-            else {
-                if (!isset($result['calculate'][$item->companyID])) $result['calculate'][$item->companyID] = 0;
+            if (!isset($result['items'][$item->companyID]['price'][$item->itemID])) $result['items'][$item->companyID]['price'][$item->itemID] = 0;
+            $result['items'][$item->companyID]['price'][$item->itemID] += $item->value;
+            if ($item->type !== 'welcome') {
+                if (!isset($result['items'][$item->companyID]['calculate'])) $result['items'][$item->companyID]['calculate'] = 0;
                 switch ($item->square_type) {
                     case 1:
                     case 2:
+                    case 4:
                     case 5:
                     case 7:
                     case 8: {
-                        if (!isset($result['welcome_automatic'][$item->companyID]['pavilion'])) $result['welcome_automatic'][$item->companyID]['pavilion'] = 0;
-                        $result['welcome_automatic'][$item->companyID]['pavilion'] += $item->value;
-                        $result['calculate'][$item->companyID] += $item->value;
-                        break;
-                    }
-                    case 4: {
-                        if (!isset($result['welcome_automatic'][$item->companyID]['open_building'])) $result['welcome_automatic'][$item->companyID]['open_building'] = 0;
-                        $result['welcome_automatic'][$item->companyID]['open_building'] += $item->value;
-                        $result['calculate'][$item->companyID] += $item->value;
+                        $result['items'][$item->companyID]['calculate'] += $item->value;
+                        $result['total']['calculate'] += $item->value;
                         break;
                     }
                     case 3:
                     case 6: {
-                        if (!isset($result['welcome_automatic'][$item->companyID]['open_demo'])) $result['welcome_automatic'][$item->companyID]['open_demo'] = 0;
-                        $result['welcome_automatic'][$item->companyID]['open_demo'] += $item->value;
-                        $result['calculate'][$item->companyID] += round($item->value / 2);
+                        $result['items'][$item->companyID]['calculate'] += round($item->value / 2);
+                        $result['total']['calculate'] += round($item->value / 2);
                         break;
                     }
                 }
             }
+            if (!isset($result['total']['price'][$item->itemID])) $result['total']['price'][$item->itemID] = 0;
+            $result['total']['price'][$item->itemID] += $item->value;
         }
         $result['stands'] = $this->getStands($ids ?? []);
         return $result;

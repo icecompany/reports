@@ -20,7 +20,10 @@ HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'rel
               name="adminForm" id="adminForm">
             <?php echo JLayoutHelper::render('joomla.searchtools.default', array('view' => $this)); ?>
             <table class="table table-striped">
-                <thead><?php echo $this->loadTemplate('head'); ?></thead>
+                <thead>
+                    <?php echo $this->loadTemplate('head'); ?>
+                    <?php echo $this->loadTemplate('total'); ?>
+                </thead>
                 <tbody><?php echo $this->loadTemplate('body'); ?></tbody>
                 <tfoot><?php echo $this->loadTemplate('foot'); ?></tfoot>
             </table>
