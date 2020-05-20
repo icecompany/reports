@@ -54,7 +54,7 @@
 				Note that all & must be escaped to &amp; for the file to be valid
 				XML and be parsed by the installer
 			-->
-			<menu link="option=com_reports">COM_REPORTS</menu>
+			<menu view="welcome">COM_REPORTS_MENU_WELCOME</menu>
 		</submenu>
 
 		<!-- Core files -->
