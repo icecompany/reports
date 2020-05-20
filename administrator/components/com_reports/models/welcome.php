@@ -69,7 +69,7 @@ class ReportsModelWelcome extends ListModel
                 $result['items'][$item->companyID]['site'] = $item->site;
                 $result['items'][$item->companyID]['site_link'] = JHtml::link(JRoute::_($item->site), $item->site, ['target' => '_blank']);
                 $manager = explode(' ', $item->manager);
-                $arr['manager'] = $manager[0];
+                $result['items'][$item->companyID]['manager'] = $manager[0];
                 $result['items'][$item->companyID]['price'] = [];
             }
             if (!isset($result['items'][$item->companyID]['price'][$item->itemID])) $result['items'][$item->companyID]['price'][$item->itemID] = 0;
@@ -101,6 +101,77 @@ class ReportsModelWelcome extends ListModel
         $result['stands'] = $this->getStands($ids ?? []);
         $result['contacts'] = $this->getContacts(array_keys($result['items']) ?? []);
         return $result;
+    }
+
+    public function export()
+    {
+        $items = $this->getItems();
+        JLoader::discover('PHPExcel', JPATH_LIBRARIES);
+        JLoader::register('PHPExcel', JPATH_LIBRARIES . '/PHPExcel.php');
+
+        $xls = new PHPExcel();
+        $xls->setActiveSheetIndex(0);
+        $sheet = $xls->getActiveSheet();
+
+        $sheet->getStyle("A2")->getFont()->setBold(true);
+        $sheet->getStyle("F")->getFont()->setBold(true);
+
+        //Ширина столбцов
+        $width = ["A" => 60, "B" => 13, "C" => 13, "D" => 25, "E" => 40, "F" => 20];
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+
+        $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_COMPANY'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_MANAGER'));
+        $sheet->setCellValue("C1", JText::sprintf('COM_REPORTS_HEAD_STANDS'));
+        $sheet->setCellValue("D1", JText::sprintf('COM_REPORTS_HEAD_SITE'));
+        $sheet->setCellValue("E1", JText::sprintf('COM_REPORTS_HEAD_CONTACTS'));
+        $sheet->setCellValue("F1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_CALCULATE'));
+        $col = 6;
+        foreach ($items['price'] as $id => $title) {
+            $sheet->setCellValueByColumnAndRow($col, 1, $title);
+            $col++;
+        }
+
+        //Итого
+        $sheet->mergeCells("A2:E2");
+        $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("F2", $items['total']['calculate'] ?? 0);
+        $sheet->getStyle("A2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+        $col = 6;
+        foreach ($items['price'] as $itemID => $title) {
+            $sheet->setCellValueByColumnAndRow($col, 2, $items['total']['price'][$itemID] ?? 0);
+            $col++;
+        }
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_WELCOME'));
+
+        //Данные. Один проход цикла - одна строка
+        $row = 3; //Строка, с которой начнаются данные
+        $col = 6;
+        foreach ($items['items'] as $companyID => $company) {
+            $sheet->setCellValue("A{$row}", $company['company']);
+            $sheet->setCellValue("B{$row}", $company['manager']);
+            $sheet->setCellValueExplicit("C{$row}", $items['stands'][$companyID], PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("D{$row}", $company['site']);
+            $sheet->setCellValue("E{$row}", $items['contacts'][$companyID]);
+            $sheet->setCellValue("F{$row}", $company['calculate'] ?? 0);
+            foreach ($items['price'] as $itemID => $title) {
+                $sheet->setCellValueByColumnAndRow($col, $row, $items['items'][$companyID]['price'][$itemID] ?? 0);
+                $col++;
+            }
+            $row++;
+            $col = 6;
+        }
+        header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
+        header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
+        header("Cache-Control: no-cache, must-revalidate");
+        header("Pragma: public");
+        header("Content-type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=Welcome.xls");
+        $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
+        $objWriter->save('php://output');
+        jexit();
     }
 
     private function getContacts(array $companyIDs = []): array
