@@ -99,6 +99,27 @@ class ReportsModelWelcome extends ListModel
             $result['total']['price'][$item->itemID] += $item->value;
         }
         $result['stands'] = $this->getStands($ids ?? []);
+        $result['contacts'] = $this->getContacts(array_keys($result['items']) ?? []);
+        return $result;
+    }
+
+    private function getContacts(array $companyIDs = []): array
+    {
+        if (empty($companyIDs)) return [];
+        JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_companies/models");
+        $model = JModelLegacy::getInstance('Contacts', 'CompaniesModel', ['companyIDs' => $companyIDs, 'ignore_request' => true]);
+        $contacts = $model->getItems();
+        $result = [];
+        foreach ($contacts as $contact) {
+            $arr = [];
+            if (!empty($contact['fio'])) $arr[] = $contact['fio'];
+            if (!empty($contact['post'])) $arr[] = $contact['post'];
+            if (!empty($contact['phone_work'])) $arr[] = $contact['phone_work'];
+            if (!empty($contact['phone_mobile'])) $arr[] = $contact['phone_mobile'];
+            if (!empty($contact['email'])) $arr[] = $contact['email'];
+            $result[$contact['companyID']][] = implode(', ', $arr);
+        }
+        foreach (array_keys($result) as $companyID) $result[$companyID] = implode('; ', $result[$companyID]);
         return $result;
     }
 

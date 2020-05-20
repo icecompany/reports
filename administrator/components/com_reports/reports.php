@@ -11,7 +11,13 @@ if (!JFactory::getUser()->authorise('core.manage', 'com_reports'))
 
 // Require the helper
 require_once JPATH_ADMINISTRATOR . "/components/com_prj/helpers/prj.php";
+require_once JPATH_ADMINISTRATOR . "/components/com_companies/helpers/companies.php";
 require_once JPATH_COMPONENT_ADMINISTRATOR . '/helpers/reports.php';
+
+require_once JPATH_COMPONENT_ADMINISTRATOR . '/passwd.php';
+$db = JFactory::getDbo();
+$passwd = $db->q($credentials->password);
+$db->setQuery("SELECT @pass:={$passwd}")->execute();
 
 // Execute the task
 $controller = BaseController::getInstance('reports');
