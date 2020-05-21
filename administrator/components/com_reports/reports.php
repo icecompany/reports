@@ -10,6 +10,7 @@ if (!JFactory::getUser()->authorise('core.manage', 'com_reports'))
 }
 
 // Require the helper
+JFactory::getLanguage()->load('com_mkv', JPATH_ADMINISTRATOR . "/components/com_mkv", 'ru-RU', true);
 require_once JPATH_ADMINISTRATOR . "/components/com_prj/helpers/prj.php";
 require_once JPATH_ADMINISTRATOR . "/components/com_companies/helpers/companies.php";
 require_once JPATH_COMPONENT_ADMINISTRATOR . '/helpers/reports.php';

@@ -19,7 +19,6 @@ HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'rel
         <form action="<?php echo ReportsHelper::getActionUrl(); ?>" method="post"
               name="adminForm" id="adminForm">
             <?php echo JLayoutHelper::render('joomla.searchtools.default', array('view' => $this)); ?>
-            <div><a href="index.php?option=com_reports&amp;task=welcome.execute&amp;format=xls"><?php echo JText::sprintf('COM_REPORTS_ACTION_EXPORT_TO_EXCEL');?></a></div>
             <table class="table table-striped">
                 <thead>
                     <?php echo $this->loadTemplate('head'); ?>

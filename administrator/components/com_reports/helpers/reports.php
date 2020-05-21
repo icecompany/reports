@@ -10,7 +10,7 @@ class ReportsHelper
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS'), 'index.php?option=com_reports&view=reports', $vName === 'reports');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_WELCOME'), 'index.php?option=com_reports&view=welcome', $vName === 'welcome');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_TITLE_COMPLAIN_BASIC_OLD'), 'index.php?option=com_reports&view=complain_basic_old', $vName === 'complain_basic_old');
-        JHtmlSidebar::addFilter(JText::sprintf("COM_REPORTS_FILTER_SELECT_ACTIVE_PROJECT"), "set_active_project", JHtml::_("select.options", PrjHelper::getAvailableProjects(), "value", "text", PrjHelper::getActiveProject()));
+        PrjHelper::addActiveProjectFilter();
 	}
 
     /**
