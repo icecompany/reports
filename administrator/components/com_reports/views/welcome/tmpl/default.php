@@ -11,7 +11,7 @@ HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'rel
 ?>
 <div class="row-fluid">
     <div id="j-sidebar-container" class="span2">
-        <form action="<?php echo ReportsHelper::getSidebarAction(); ?>" method="post">
+        <form action="<?php echo PrjHelper::getSidebarAction(); ?>" method="post">
             <?php echo $this->sidebar; ?>
         </form>
     </div>
