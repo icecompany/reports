@@ -33,7 +33,7 @@ class ReportsViewContracts_statuses extends HtmlView
     private function toolbar()
     {
         JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES'), 'tree-2');
-        JToolbarHelper::custom('contract_statuses.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
+        JToolbarHelper::custom('contracts_statuses.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
         if (ReportsHelper::canDo('core.admin'))
         {
             JToolBarHelper::preferences('com_reports');
