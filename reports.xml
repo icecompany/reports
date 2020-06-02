@@ -55,6 +55,7 @@
 				XML and be parsed by the installer
 			-->
 			<menu view="welcome">COM_REPORTS_MENU_WELCOME</menu>
+			<menu view="contracts_statuses">COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES</menu>
 		</submenu>
 
 		<!-- Core files -->
