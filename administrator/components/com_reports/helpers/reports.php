@@ -9,6 +9,7 @@ class ReportsHelper
 	{
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS'), 'index.php?option=com_reports&view=reports', $vName === 'reports');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_WELCOME'), 'index.php?option=com_reports&view=welcome', $vName === 'welcome');
+		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES'), 'index.php?option=com_reports&view=contracts_statuses', $vName === 'contracts_statuses');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_TITLE_COMPLAIN_BASIC_OLD'), 'index.php?option=com_reports&view=complain_basic_old', $vName === 'complain_basic_old');
         PrjHelper::addActiveProjectFilter();
 	}
