@@ -21,6 +21,18 @@ class ReportsModelInvites extends ListModel
             );
         }
         parent::__construct($config);
+        $this->heads = [
+            'company' => 'COM_REPORTS_HEAD_COMPANY',
+            'invite_date' => 'COM_REPORTS_HEAD_INVITE_DATA',
+            'invite_outgoing_number' => 'COM_REPORTS_HEAD_INVITE_SENT_NUMBER',
+            'invite_incoming_number' => 'COM_REPORTS_HEAD_INVITE_INCOMING_NUMBER',
+            'manager' => 'COM_REPORTS_HEAD_MANAGER',
+            'email' => 'COM_REPORTS_HEAD_INVITE_EMAIL',
+            'status' => 'COM_REPORTS_HEAD_INVITE_RESULT',
+            'director_name' => 'COM_REPORTS_HEAD_INVITE_CONTACT_NAME',
+            'director_post' => 'COM_REPORTS_HEAD_INVITE_CONTACT_POST',
+            'phone_1' => 'COM_REPORTS_HEAD_INVITE_CONTACT_PHONE',
+        ];
     }
 
     protected function _getListQuery()
@@ -65,7 +77,7 @@ class ReportsModelInvites extends ListModel
             $arr = [];
             $url = JRoute::_("index.php?option=com_projects&amp;task=contract.edit&amp;id={$item->contractID}&amp;return={$return}");
             $arr['edit_link'] = JHtml::link($url, $item->company);
-            $arr['manager'] = $item->manager;
+            $arr['manager'] = MkvHelper::getLastAndFirstNames($item->manager);
             $arr['company'] = $item->company;
             $arr['status'] = $item->status;
             $arr['director_name'] = $item->director_name;
@@ -78,8 +90,47 @@ class ReportsModelInvites extends ListModel
             $arr['invite_incoming_number'] = $item->invite_incoming_number;
             $result[] = $arr;
         }
-
         return $result;
+    }
+
+    public function export()
+    {
+        $items = $this->getItems();
+        JLoader::discover('PHPExcel', JPATH_LIBRARIES);
+        JLoader::register('PHPExcel', JPATH_LIBRARIES . '/PHPExcel.php');
+
+        $xls = new PHPExcel();
+        $xls->setActiveSheetIndex(0);
+        $sheet = $xls->getActiveSheet();
+
+        //Ширина столбцов
+        $width = ["A" => 60, "B" => 13, "C" => 13, "D" => 13, "E" => 22, "F" => 30, "G" => 28, "H" => 40, "I" => 26, "J" => 20];
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+        //Заголовки
+        $j = 0;
+        foreach ($this->heads as $item => $head) $sheet->setCellValueByColumnAndRow($j++, 1, JText::sprintf($head));
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_INVITES_EXPORT'));
+
+        //Данные
+        $row = 2; //Строка, с которой начнаются данные
+        $col = 0;
+        foreach ($items as $item) {
+            foreach ($this->heads as $elem => $head) {
+                $sheet->setCellValueByColumnAndRow($col++, $row, $item[$elem]);
+            }
+            $col = 0;
+            $row++;
+        }
+        header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
+        header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
+        header("Cache-Control: no-cache, must-revalidate");
+        header("Pragma: public");
+        header("Content-type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=Invites.xls");
+        $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
+        $objWriter->save('php://output');
+        jexit();
     }
 
     /* Сортировка по умолчанию */
@@ -95,4 +146,6 @@ class ReportsModelInvites extends ListModel
         $id .= ':' . $this->getState('filter.search');
         return parent::getStoreId($id);
     }
+
+    private $heads;
 }

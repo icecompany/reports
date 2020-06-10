@@ -30,6 +30,7 @@ class ReportsViewInvites extends HtmlView
     private function toolbar()
     {
         JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_INVITES'), 'signup');
+        JToolbarHelper::custom('invites.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
         if (ReportsHelper::canDo('core.admin'))
         {
             JToolBarHelper::preferences('com_reports');
