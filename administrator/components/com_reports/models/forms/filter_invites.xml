@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldpath="administrator/components/com_prj/models/fields/">
+    <fields name="filter">
+        <field
+                name="search"
+                type="text"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                hint="COM_REPORTS_FILTER_ITEM"
+                autocomplete="off"
+                class="js-stools-search-string"
+        />
+    </fields>
+    <fields name="list">
+        <field
+                name="limit"
+                type="limitbox"
+                class="input-mini"
+                default="0"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>

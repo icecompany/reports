@@ -56,6 +56,7 @@
 			-->
 			<menu view="welcome">COM_REPORTS_MENU_WELCOME</menu>
 			<menu view="contracts_statuses">COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES</menu>
+			<menu view="invites">COM_REPORTS_PAGE_INVITES</menu>
 		</submenu>
 
 		<!-- Core files -->
