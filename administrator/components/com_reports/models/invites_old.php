@@ -35,7 +35,7 @@ class ReportsModelInvites_old extends ListModel
             ->leftJoin("#__prj_exp e on e.id = c.expID")
             ->leftJoin("#__prj_user_action_log ual on ual.itemID = c.id")
             ->leftJoin("#__users u on u.id = c.managerID")
-            ->where(" c.prjID = 11 and ual.action like 'add' and ual.section like 'contract' and ual.dat > '2020-03-23' and c.invite_date is null");
+            ->where("c.prjID = 11 and c.status not in (-1, 7, 8) and ual.action like 'add' and ual.section like 'contract' and ual.dat > '2020-03-23' and c.invite_date is null");
         $search = $this->getState('filter.search');
         if (!empty($search)) {
             $text = $this->_db->q("%{$search}%");
