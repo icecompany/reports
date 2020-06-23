@@ -18,8 +18,7 @@ require_once JPATH_ADMINISTRATOR . "/components/com_mkv/helpers/mkv.php";
 require_once JPATH_ADMINISTRATOR . "/components/com_contracts/helpers/contracts.php";
 require_once JPATH_ADMINISTRATOR . "/components/com_companies/helpers/companies.php";
 require_once JPATH_COMPONENT_ADMINISTRATOR . '/helpers/reports.php';
-
-require_once JPATH_COMPONENT_ADMINISTRATOR . '/passwd.php';
+require_once JPATH_ADMINISTRATOR . '/components/com_companies/passwd.php';
 $db = JFactory::getDbo();
 $passwd = $db->q($credentials->password);
 $db->setQuery("SELECT @pass:={$passwd}")->execute();
