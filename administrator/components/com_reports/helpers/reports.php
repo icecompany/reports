@@ -8,10 +8,37 @@ class ReportsHelper
 	public function addSubmenu($vName)
 	{
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS'), 'index.php?option=com_reports&view=reports', $vName === 'reports');
+		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_COMPANIES'), 'index.php?option=com_reports&view=companies', $vName === 'companies');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_WELCOME'), 'index.php?option=com_reports&view=welcome', $vName === 'welcome');
         HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_INVITES'), 'index.php?option=com_reports&view=invites', $vName === 'invites');
         HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES'), 'index.php?option=com_reports&view=contracts_statuses', $vName === 'contracts_statuses');
         PrjHelper::addActiveProjectFilter();
+	}
+
+    public static function getHeads()
+    {
+        return [
+            'company' => 'COM_MKV_HEAD_COMPANY',
+            'company_full' => 'COM_REPORTS_HEAD_COMPANY_TITLE_FULL',
+            'stands' => 'COM_MKV_HEAD_STANDS',
+            'manager' => 'COM_MKV_HEAD_MANAGER',
+            'contract_status' => 'COM_MKV_HEAD_CONTRACT_STATUS',
+            'contract_number' => 'COM_MKV_HEAD_CONTRACT_NUMBER',
+            'contract_date' => 'COM_MKV_HEAD_CONTRACT_DATE',
+            'doc_status' => 'COM_REPORTS_HEAD_DOC_STATUS',
+            'director_name' => 'COM_REPORTS_HEAD_COMPANY_DIRECTOR_NAME',
+            'director_post' => 'COM_REPORTS_HEAD_COMPANY_DIRECTOR_POST',
+            'contract_amount' => 'COM_MKV_HEAD_AMOUNT',
+            'contract_payments' => 'COM_MKV_HEAD_PAYED',
+            'contract_debt' => 'COM_MKV_HEAD_DEBT',
+            'email' => 'COM_REPORTS_HEAD_EMAIL',
+            'site' => 'COM_REPORTS_HEAD_SITE',
+            'phones' => 'COM_REPORTS_HEAD_PHONES',
+            'contacts' => 'COM_REPORTS_HEAD_CONTACTS',
+            'address_legal' => 'COM_REPORTS_HEAD_ADDRESS_LEGAL',
+            'address_fact' => 'COM_REPORTS_HEAD_ADDRESS_FACT',
+            'thematics' => 'COM_REPORTS_HEAD_THEMATICS',
+        ];
 	}
 
     /**

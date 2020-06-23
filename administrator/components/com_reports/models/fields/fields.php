@@ -3,26 +3,18 @@ defined('_JEXEC') or die;
 jimport('joomla.form.helper');
 JFormHelper::loadFieldClass('list');
 
-class JFormFieldManager extends JFormFieldList
+class JFormFieldFields extends JFormFieldList
 {
-    protected $type = 'Manager';
+    protected $type = 'Fields';
     protected $loadExternally = 0;
 
     protected function getOptions()
     {
-        $db =& JFactory::getDbo();
-        $query = $db->getQuery(true);
-        $query
-            ->select("`id`, `name`")
-            ->from("`#__users`")
-            ->order("`name`")
-            ->where("block = 0");
-        $result = $db->setQuery($query)->loadObjectList();
-
+        $heads = ReportsHelper::getHeads();
         $options = array();
 
-        foreach ($result as $item) {
-            $options[] = JHtml::_('select.option', $item->id, $item->name);
+        foreach ($heads as $field => $title) {
+            $options[] = JHtml::_('select.option', $field, JText::sprintf($title));
         }
 
         if (!$this->loadExternally) {

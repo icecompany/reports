@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+    <layout title="COM_REPORTS_MENU_COMPANIES">
+        <message>
+            <![CDATA[COM_REPORTS_MENU_COMPANIES_DESC]]>
+		</message>
+    </layout>
+</metadata>

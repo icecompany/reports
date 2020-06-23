@@ -3,10 +3,10 @@ use Joomla\CMS\MVC\View\HtmlView;
 
 defined('_JEXEC') or die;
 
-class ReportsViewContracts_statuses extends HtmlView
+class ReportsViewCompanies extends HtmlView
 {
     protected $sidebar = '';
-    public $items, $pagination, $state, $filterForm, $activeFilters;
+    public $items, $pagination, $uid, $state, $filterForm, $activeFilters;
 
     public function display($tpl = null)
     {
@@ -16,15 +16,14 @@ class ReportsViewContracts_statuses extends HtmlView
         $this->filterForm = $this->get('FilterForm');
         $this->activeFilters = $this->get('ActiveFilters');
 
-        $this->filterForm->setValue('projects', 'filter', $this->state->get('filter.projects'));
-        $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_prj/models/fields");
+        $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_contracts/models/fields");
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_mkv/models/fields");
 
         // Show the toolbar
         $this->toolbar();
 
         // Show the sidebar
-        ReportsHelper::addSubmenu('contracts_statuses');
+        ReportsHelper::addSubmenu('companies');
         $this->sidebar = JHtmlSidebar::render();
 
         // Display it all
@@ -33,8 +32,8 @@ class ReportsViewContracts_statuses extends HtmlView
 
     private function toolbar()
     {
-        JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES'), 'tree-2');
-        JToolbarHelper::custom('contracts_statuses.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
+        JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_COMPANIES'), 'screen');
+        JToolbarHelper::custom('companies.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
         if (ReportsHelper::canDo('core.admin'))
         {
             JToolBarHelper::preferences('com_reports');
