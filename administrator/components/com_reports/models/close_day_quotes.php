@@ -33,6 +33,7 @@ class ReportsModelClose_day_quotes extends ListModel
             'total' => 'COM_REPORTS_HEAD_TOTAL',
             'manager' => 'COM_MKV_HEAD_MANAGER',
         ];
+        $this->save = JFactory::getApplication()->input->getBool('save', false);
     }
 
     protected function _getListQuery()
@@ -153,14 +154,32 @@ class ReportsModelClose_day_quotes extends ListModel
             $col = 0;
             $row++;
         }
-        header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
-        header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Pragma: public");
-        header("Content-type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=Close_day_quotes.xls");
+        if (!$this->save) {
+            header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
+            header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
+            header("Cache-Control: no-cache, must-revalidate");
+            header("Pragma: public");
+            header("Content-type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Close_day_quotes.xls");
+        }
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
-        $objWriter->save('php://output');
+        $t = time();
+        $path_full = JPATH_SITE . "/reports/Close_day_quotes_{$t}.xls";
+        $filename = "Close_day_quotes_{$t}.xls";
+        $objWriter->save((!$this->save) ? 'php://output' : $path_full);
+        if ($this->save) {
+            jimport('joomla.mail.helper');
+            $mailer = JFactory::getMailer();
+            $mailer->addAttachment($path_full, $filename);
+            $mailer->isHtml(true);
+            $mailer->Encoding = 'base64';
+            $mailer->addRecipient("asharikov@icecompany.org", "Антон Михайлович");
+            $mailer->setFrom("xakepok@xakepok.com", "MKV");
+            $mailer->setBody("Во вложении");
+            $mailer->setSubject("Report: Close day quotes " . JFactory::getDate()->format("Y-m-d"));
+            var_dump($mailer->Send());
+            unlink($path_full);
+        }
         jexit();
     }
 
@@ -199,5 +218,5 @@ class ReportsModelClose_day_quotes extends ListModel
         return parent::getStoreId($id);
     }
 
-    private $heads;
+    private $heads, $save;
 }

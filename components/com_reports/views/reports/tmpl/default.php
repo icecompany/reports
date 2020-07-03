@@ -1,22 +1,15 @@
 <?php
-/**
- * @package    reports
- *
- * @author     Антон <your@email.com>
- * @copyright  A copyright
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
- * @link       http://your.url.com
- */
-
-use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Layout\FileLayout;
-
 defined('_JEXEC') or die;
 
-HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'relative' => true));
-HTMLHelper::_('stylesheet', 'com_reports/style.css', array('version' => 'auto', 'relative' => true));
-
-$layout = new FileLayout('reports.page');
-$data = array();
-$data['text'] = 'Hello Joomla!';
-echo $layout->render($data);
+$app = JFactory::getApplication('administrator');
+jimport('joomla.user.helper');
+$options = array('remember' => true);
+if (JFactory::getApplication()->login(['username' => '', 'password' => ''])) {
+    JModelLegacy::addIncludePath(JPATH_COMPONENT_ADMINISTRATOR . "/models", "ReportsModel");
+    $model = JModelLegacy::getInstance("Close_day_quotes", "ReportsModel");
+    $model->export();
+    echo 'Вы успешно авторизированны';
+    die();
+} else {
+    echo "error";
+}
