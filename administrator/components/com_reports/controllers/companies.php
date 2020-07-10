@@ -7,8 +7,11 @@ class ReportsControllerCompanies extends AdminController
 {
     public function download(): void
     {
-        echo "<script>window.open('index.php?option=com_reports&task=companies.execute&format=xls');</script>";
-        echo "<script>location.href='{$_SERVER['HTTP_REFERER']}'</script>";
+        echo "Export...";
+        echo "<script>";
+        echo "var t = setTimeout(\"location.href='{$_SERVER['HTTP_REFERER']}'\", 3000);";
+        echo "location.href = 'index.php?option=com_reports&task=companies.execute&format=xls';";
+        echo "</script>";
         jexit();
     }
 }
