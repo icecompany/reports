@@ -9,6 +9,16 @@ use Joomla\CMS\HTML\HTMLHelper;
 HTMLHelper::_('stylesheet', 'com_reports/style.css', array('version' => 'auto', 'relative' => true));
 HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'relative' => true));
 ?>
+<script>
+    Joomla.submitbutton = function (task) {
+        let form = document.querySelector('#adminForm');
+        if (task === 'invites.download') {
+            location.href = 'index.php?option=com_reports&task=invites.execute&format=xls';
+            return false;
+        }
+        else Joomla.submitform(task, form);
+    };
+</script>
 <div class="row-fluid">
     <div id="j-sidebar-container" class="span2">
         <form action="<?php echo PrjHelper::getSidebarAction(); ?>" method="post">
