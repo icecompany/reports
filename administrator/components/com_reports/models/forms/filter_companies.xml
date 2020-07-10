@@ -18,6 +18,12 @@
             <option value="">COM_MKV_FILTER_SELECT_MANAGER</option>
         </field>
         <field
+                name="item"
+                type="PriceItem"
+                multiple="true"
+                onchange="this.form.submit();"
+        />
+        <field
                 name="status"
                 type="ContractStatus"
                 multiple="true"

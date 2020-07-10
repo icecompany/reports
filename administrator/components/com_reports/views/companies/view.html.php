@@ -18,6 +18,7 @@ class ReportsViewCompanies extends HtmlView
 
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_contracts/models/fields");
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_mkv/models/fields");
+        $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_prices/models/fields");
 
         // Show the toolbar
         $this->toolbar();

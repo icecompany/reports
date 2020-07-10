@@ -19,6 +19,7 @@ class ReportsModelCompanies extends ListModel
                 'manager',
                 'fields',
                 'status',
+                'item',
             );
         }
         $format = JFactory::getApplication()->input->getString('format', 'html');
@@ -124,6 +125,13 @@ class ReportsModelCompanies extends ListModel
         if (!empty($search)) {
             $text = $this->_db->q("%{$search}%");
             $query->where("(e.title like {$text} or e.title_full like {$text})");
+        }
+        $item = $this->getState('filter.item');
+        if (is_array($item) && !empty($item)) {
+            $item_ids = implode(', ', $item);
+            $query
+                ->leftJoin("#__mkv_contract_items ci on ci.contractID = c.id")
+                ->where("ci.itemID in ({$item_ids})");
         }
         $limit = (!$this->export) ? $this->getState('list.limit') : 0;
         $this->setState('list.limit', $limit);
@@ -313,6 +321,8 @@ class ReportsModelCompanies extends ListModel
         $this->setState('filter.status', $status);
         $fields = $this->getUserStateFromRequest($this->context . '.filter.fields', 'filter_fields');
         $this->setState('filter.fields', $fields);
+        $item = $this->getUserStateFromRequest($this->context . '.filter.item', 'filter_item');
+        $this->setState('filter.item', $item);
         parent::populateState($ordering, $direction);
         ReportsHelper::check_refresh();
     }
@@ -323,6 +333,7 @@ class ReportsModelCompanies extends ListModel
         $id .= ':' . $this->getState('filter.manager');
         $id .= ':' . $this->getState('filter.status');
         $id .= ':' . $this->getState('filter.fields');
+        $id .= ':' . $this->getState('filter.item');
         return parent::getStoreId($id);
     }
 
