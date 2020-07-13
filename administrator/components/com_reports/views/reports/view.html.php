@@ -1,84 +1,51 @@
 <?php
-/**
- * @package    reports
- *
- * @author     Антон <your@email.com>
- * @copyright  A copyright
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
- * @link       http://your.url.com
- */
-
-use Joomla\CMS\Factory;
-use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\View\HtmlView;
-use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Toolbar\ToolbarHelper;
 
 defined('_JEXEC') or die;
 
-/**
- * Reports view.
- *
- * @package   reports
- * @since     1.0.0
- */
 class ReportsViewReports extends HtmlView
 {
-	/**
-	 * Reports helper
-	 *
-	 * @var    ReportsHelper
-	 * @since  1.0.0
-	 */
-	protected $helper;
+    protected $sidebar = '';
+    public $items, $pagination, $uid, $state, $filterForm, $activeFilters;
 
-	/**
-	 * The sidebar to show
-	 *
-	 * @var    string
-	 * @since  1.0.0
-	 */
-	protected $sidebar = '';
+    public function display($tpl = null)
+    {
+        $this->items = $this->get('Items');
+        $this->pagination = $this->get('Pagination');
+        $this->state = $this->get('State');
+        $this->filterForm = $this->get('FilterForm');
+        $this->activeFilters = $this->get('ActiveFilters');
 
-	/**
-	 * Execute and display a template script.
-	 *
-	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
-	 *
-	 * @return  mixed  A string if successful, otherwise a JError object.
-	 *
-	 * @see     fetch()
-	 * @since   1.0.0
-	 */
-	public function display($tpl = null)
-	{
-		// Show the toolbar
-		$this->toolbar();
+        // Show the toolbar
+        $this->toolbar();
 
-		// Show the sidebar
-		$this->helper = new ReportsHelper;
-		$this->helper->addSubmenu('reports');
-		$this->sidebar = HTMLHelper::_('sidebar.render');
+        // Show the sidebar
+        ReportsHelper::addSubmenu('reports');
+        $this->sidebar = JHtmlSidebar::render();
 
-		// Display it all
-		return parent::display($tpl);
-	}
+        // Display it all
+        return parent::display($tpl);
+    }
 
-	/**
-	 * Displays a toolbar for a specific page.
-	 *
-	 * @return  void
-	 *
-	 * @since   1.0.0
-	 */
-	private function toolbar()
-	{
-		ToolBarHelper::title(Text::_('COM_REPORTS'), '');
+    private function toolbar()
+    {
+        JToolBarHelper::title(JText::sprintf('COM_REPORTS_REPORTS'), 'flash');
 
-		// Options button.
-		if (Factory::getUser()->authorise('core.admin', 'com_reports'))
-		{
-			ToolBarHelper::preferences('com_reports');
-		}
-	}
+        if (ReportsHelper::canDo('core.create'))
+        {
+            JToolbarHelper::addNew('report.add');
+        }
+        if (ReportsHelper::canDo('core.edit'))
+        {
+            JToolbarHelper::editList('report.edit');
+        }
+        if (ReportsHelper::canDo('core.delete'))
+        {
+            JToolbarHelper::deleteList('COM_REPORTS_DELETE_QUESTION_REPORT', 'reports.delete');
+        }
+        if (ReportsHelper::canDo('core.admin'))
+        {
+            JToolBarHelper::preferences('com_reports');
+        }
+    }
 }

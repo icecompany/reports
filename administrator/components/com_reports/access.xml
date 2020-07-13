@@ -10,5 +10,6 @@
 		<action name="core.edit.state" title="JACTION_EDITSTATE" description="JACTION_EDITSTATE_COMPONENT_DESC" />
 		<action name="core.edit.own" title="JACTION_EDITOWN" description="JACTION_EDITOWN_COMPONENT_DESC" />
 		<action name="core.edit.value" title="JACTION_EDITVALUE" description="JACTION_EDITVALUE_COMPONENT_DESC" />
+		<action name="core.reports.all" title="COM_REPORTS_ACCESS_ALL_REPORTS_LABEL" description="COM_REPORTS_ACCESS_ALL_REPORTS_DESC" />
 	</section>
 </access>

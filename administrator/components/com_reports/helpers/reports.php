@@ -16,9 +16,9 @@ class ReportsHelper
         PrjHelper::addActiveProjectFilter();
 	}
 
-    public static function getHeads()
+    public static function getHeads(string $type = 'companies'): array
     {
-        return [
+        $heads['companies'] = [
             'company' => 'COM_MKV_HEAD_COMPANY',
             'company_full' => 'COM_REPORTS_HEAD_COMPANY_TITLE_FULL',
             'stands' => 'COM_MKV_HEAD_STANDS',
@@ -40,6 +40,7 @@ class ReportsHelper
             'address_fact' => 'COM_REPORTS_HEAD_ADDRESS_FACT',
             'thematics' => 'COM_REPORTS_HEAD_THEMATICS',
         ];
+        return $heads[$type];
 	}
 
     /**
@@ -121,12 +122,12 @@ class ReportsHelper
 
     public static function canDo(string $action): bool
     {
-        return JFactory::getUser()->authorise($action, 'com_companies');
+        return JFactory::getUser()->authorise($action, 'com_reports');
     }
 
     public static function getConfig(string $param, $default = null)
     {
-        $config = JComponentHelper::getParams("com_companies");
+        $config = JComponentHelper::getParams("com_reports");
         return $config->get($param, $default);
     }
 }
