@@ -264,6 +264,43 @@ class ReportsModelCompanies extends ListModel
         jexit();
     }
 
+    public function saveReport() {
+        //Массив с состоянием фильтров
+        $preset = [];
+        $preset['manager'] = $this->getFilterForm()->getValue('manager', 'filter');
+        $preset['item'] = $this->getFilterForm()->getValue('item', 'filter');
+        $preset['status'] = $this->getFilterForm()->getValue('status', 'filter');
+        $preset['fields'] = $this->getFilterForm()->getValue('fields', 'filter');
+
+        $userID = JFactory::getUser()->id;
+
+        //Массив для вставки в базу
+        $data = [];
+        $data['params'] = json_encode($preset);
+        $data['managerID'] = $userID;
+        $data['type'] = JFactory::getApplication()->input->getString('view');
+
+        //Проверка уже существующих отчётов на наличие такого же
+        $table = parent::getTable('Reports', 'TableReports');
+        $table->load($data);
+        if ($table->id !== null) {
+            $message = JText::sprintf('COM_REPORTS_MSG_REPORT_ALREADY_EXISTS', $table->title);
+            $type = 'warning';
+        }
+        else {
+            $table->save($data);
+            $data['id'] = $table->id;
+            $data['title'] = JText::sprintf('COM_REPORTS_NEW_REPORT_TITLE', $table->id);
+            $data['type_show'] = JText::sprintf('COM_REPORTS_MENU_COMPANIES');
+            $table->save($data);
+            $message = JText::sprintf('COM_REPORTS_MSG_REPORT_SAVE', $table->id);
+            $type = 'message';
+        }
+        $uri = JUri::getInstance($_SERVER['HTTP_REFERER']);
+        JFactory::getApplication()->enqueueMessage($message, $type);
+        JFactory::getApplication()->redirect($uri->toString());
+    }
+
     private function getStands(array $ids = []): array
     {
         if (empty($ids)) return [];

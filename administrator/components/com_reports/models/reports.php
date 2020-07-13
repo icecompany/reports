@@ -33,7 +33,7 @@ class ReportsModelReports extends ListModel
             ->select("r.*")
             ->select("u.name as manager")
             ->from("#__mkv_reports r")
-            ->leftJoin("#__mkv_users u on u.id = r.managerID");
+            ->leftJoin("#__users u on u.id = r.managerID");
 
         if (!ReportsHelper::canDo('core.reports.all')) {
             $userID = JFactory::getUser()->id;
@@ -71,7 +71,7 @@ class ReportsModelReports extends ListModel
             $arr['id'] = $item->id;
             $arr['title'] = $item->title;
             $arr['manager'] = $item->manager;
-            $arr['type'] = $item->type;
+            $arr['type'] = $item->type_show;
             $url = JRoute::_("index.php?option={$this->option}&amp;task=report.edit&amp;id={$item->id}&amp;return={$return}");
             $arr['edit_link'] = JHtml::link($url, $item->title);
             $result['items'][] = $arr;

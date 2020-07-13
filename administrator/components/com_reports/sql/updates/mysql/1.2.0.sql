@@ -4,6 +4,7 @@ create table `#__mkv_reports`
     managerID int                not null,
     title     text               not null,
     type      enum ('companies') not null,
+    type_show text               not null,
     params    text               null default null,
     constraint `#__mkv_reports_#__users_managerID_id_fk` foreign key (managerID) references `#__users` (id) on update cascade on delete cascade,
     index `#__mkv_reports_type_index` (type)

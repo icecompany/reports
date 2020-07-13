@@ -35,6 +35,7 @@ class ReportsViewCompanies extends HtmlView
     {
         JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_COMPANIES'), 'screen');
         JToolbarHelper::custom('companies.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
+        JToolbarHelper::custom('companies.save_report', 'plus', 'plus', JText::sprintf('COM_REPORTS_BUTTON_SAVE_REPORT'), false);
         if (ReportsHelper::canDo('core.admin'))
         {
             JToolBarHelper::preferences('com_reports');

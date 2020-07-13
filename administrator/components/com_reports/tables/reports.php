@@ -9,6 +9,7 @@ class TableReportsReports extends Table
 	var $managerID = null;
 	var $title = null;
 	var $type = null;
+	var $type_show = null;
 	var $params = null;
 
 	public function __construct(JDatabaseDriver $db)

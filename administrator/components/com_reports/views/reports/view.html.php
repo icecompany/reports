@@ -31,10 +31,6 @@ class ReportsViewReports extends HtmlView
     {
         JToolBarHelper::title(JText::sprintf('COM_REPORTS_REPORTS'), 'flash');
 
-        if (ReportsHelper::canDo('core.create'))
-        {
-            JToolbarHelper::addNew('report.add');
-        }
         if (ReportsHelper::canDo('core.edit'))
         {
             JToolbarHelper::editList('report.edit');
