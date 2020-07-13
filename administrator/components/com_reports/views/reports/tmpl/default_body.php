@@ -15,9 +15,9 @@ foreach ($this->items['items'] as $i => $item) :
             <?php echo $item['report_link']; ?>
         </td>
         <td>
-            <?php echo $item['type']; ?>
+            <?php echo $item['type_show']; ?>
         </td>
-        <?php if (ReportsHelper::canDo('core.reports.all')): ?>
+        <?php if (ReportsHelper::canDo('core.cron.all')): ?>
             <td>
                 <?php echo $item['manager']; ?>
             </td>

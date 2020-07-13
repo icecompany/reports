@@ -1,6 +1,6 @@
 <?php
 /**
- * @package    reports
+ * @package    cron
  *
  * @author     Антон <your@email.com>
  * @copyright  A copyright

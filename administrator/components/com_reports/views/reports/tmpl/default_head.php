@@ -16,7 +16,7 @@ $listDirn = $this->escape($this->state->get('list.direction'));
     <th>
         <?php echo JText::sprintf('COM_REPORTS_HEAD_REPORTS_TYPE'); ?>
     </th>
-    <?php if (ReportsHelper::canDo('core.reports.all')): ?>
+    <?php if (ReportsHelper::canDo('core.cron.all')): ?>
         <th>
             <?php echo JHtml::_('searchtools.sort', 'COM_MKV_HEAD_MANAGER', 'manager', $listDirn, $listOrder); ?>
         </th>

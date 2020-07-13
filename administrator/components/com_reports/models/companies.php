@@ -6,7 +6,7 @@ defined('_JEXEC') or die;
 /**
  * Сравнение проданных элементов по разным проектам
  *
- * @package   reports
+ * @package   cron
  * @since     1.0.0
  */
 class ReportsModelCompanies extends ListModel
@@ -24,7 +24,8 @@ class ReportsModelCompanies extends ListModel
         }
         $format = JFactory::getApplication()->input->getString('format', 'html');
         parent::__construct($config);
-        $this->export = ($format === 'xls');
+        $this->cron = $config['cron'] ?? false;
+        $this->export = ($format === 'xls' || $this->cron);
         $this->heads = ReportsHelper::getHeads();
     }
 
@@ -227,7 +228,7 @@ class ReportsModelCompanies extends ListModel
         return $result;
     }
 
-    public function export()
+    public function export($userID = 0, $title = '')
     {
         $items = $this->getItems();
         JLoader::discover('PHPExcel', JPATH_LIBRARIES);
@@ -253,15 +254,34 @@ class ReportsModelCompanies extends ListModel
             $col = 0;
             $row++;
         }
-        header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
-        header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Pragma: public");
-        header("Content-type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=Companies.xls");
+        if (!$this->cron) {
+            header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
+            header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
+            header("Cache-Control: no-cache, must-revalidate");
+            header("Pragma: public");
+            header("Content-type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=Companies.xls");
+        }
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
-        $objWriter->save('php://output');
-        jexit();
+        $t = time();
+        $path_full = JPATH_SITE . "/cron/Companies_{$t}.xls";
+        $filename = "Companies_{$t}.xls";
+        $objWriter->save((!$this->cron) ? 'php://output' : $path_full);
+        if ($this->cron) {
+            jimport('joomla.mail.helper');
+            $mailer = JFactory::getMailer();
+            $user = JFactory::getUser($userID);
+            $mailer->addAttachment($path_full, $filename);
+            $mailer->isHtml(true);
+            $mailer->Encoding = 'base64';
+            $mailer->addRecipient($user->email, $user->name);
+            $mailer->setFrom("xakepok@xakepok.com", "MKV");
+            $mailer->setBody("Во вложении");
+            $mailer->setSubject("{$title} " . JFactory::getDate()->format("Y-m-d"));
+            $mailer->Send();
+            unlink($path_full);
+        }
+        if (!$this->cron) jexit();
     }
 
     public function saveReport() {
@@ -382,5 +402,5 @@ class ReportsModelCompanies extends ListModel
         return parent::getStoreId($id);
     }
 
-    private $export, $heads;
+    private $export, $heads, $cron;
 }

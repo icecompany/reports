@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
+	<fieldset name="cron" label="COM_REPORTS_OPTIONS_CRON_LABEL" description="COM_REPORTS_OPTIONS_CRON_DESC">
+		<field name="cron_username"
+			   type="text"
+			   label="COM_REPORTS_OPTIONS_CRON_USERNAME_LABEL"
+			   description="COM_REPORTS_OPTIONS_CRON_USERNAME_DESC"
+			   component="com_reports"
+			   section="component"
+		/>
+		<field name="cron_password"
+			   type="password"
+			   label="COM_REPORTS_OPTIONS_CRON_PASSWORD_LABEL"
+			   description="COM_REPORTS_OPTIONS_CRON_PASSWORD_DESC"
+			   component="com_reports"
+			   section="component"
+		/>
+	</fieldset>
 	<fieldset name="permissions" label="JCONFIG_PERMISSIONS_LABEL" description="JCONFIG_PERMISSIONS_DESC">
 		<field name="rules"
 			   type="rules"

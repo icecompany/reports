@@ -15,6 +15,7 @@ class ReportsModelReports extends ListModel
                 'search',
             );
         }
+        $this->cron = $config['cron'] ?? false;
         parent::__construct($config);
     }
 
@@ -35,7 +36,14 @@ class ReportsModelReports extends ListModel
             ->from("#__mkv_reports r")
             ->leftJoin("#__users u on u.id = r.managerID");
 
-        if (!ReportsHelper::canDo('core.reports.all')) {
+        if ($this->cron) {
+            $query->where("r.cron_enabled = 1");
+            $dat = JDate::getInstance('+3 hour');
+            $query->where("r.cron_hour = {$this->_db->q($dat->hour)}");
+            $query->where("r.cron_minute = {$this->_db->q($dat->minute)}");
+        }
+
+        if (!ReportsHelper::canDo('core.cron.all') && !$this->cron) {
             $userID = JFactory::getUser()->id;
             $query->where("r.managerID = {$this->_db->q($userID)}");
         }
@@ -71,7 +79,10 @@ class ReportsModelReports extends ListModel
             $arr['id'] = $item->id;
             $arr['title'] = $item->title;
             $arr['manager'] = $item->manager;
-            $arr['type'] = $item->type_show;
+            $arr['type_show'] = $item->type_show;
+            $arr['type'] = $item->type;
+            $arr['params'] = $item->params;
+            $arr['managerID'] = $item->managerID;
             $url = JRoute::_("index.php?option={$this->option}&amp;task=report.edit&amp;id={$item->id}&amp;return={$return}");
             $arr['edit_link'] = JHtml::link($url, $item->title);
             $params = json_decode($item->params);
@@ -101,4 +112,6 @@ class ReportsModelReports extends ListModel
         $id .= ':' . $this->getState('filter.search');
         return parent::getStoreId($id);
     }
+
+    private $cron;
 }

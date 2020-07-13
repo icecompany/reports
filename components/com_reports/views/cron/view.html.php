@@ -1,6 +1,6 @@
 <?php
 /**
- * @package    reports
+ * @package    cron
  *
  * @author     Антон <your@email.com>
  * @copyright  A copyright
@@ -15,9 +15,9 @@ defined('_JEXEC') or die;
 /**
  * Reports view.
  *
- * @package   reports
+ * @package   cron
  * @since     1.0.0
  */
-class ReportsViewReports extends HtmlView
+class ReportsViewCron extends HtmlView
 {
 }

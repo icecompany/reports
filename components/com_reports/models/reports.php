@@ -1,6 +1,6 @@
 <?php
 /**
- * @package    reports
+ * @package    cron
  *
  * @author     Антон <your@email.com>
  * @copyright  A copyright
@@ -15,7 +15,7 @@ defined('_JEXEC') or die;
 /**
  * Reports model.
  *
- * @package   reports
+ * @package   cron
  * @since     1.0.0
  */
 class ReportsModelReports extends BaseDatabaseModel

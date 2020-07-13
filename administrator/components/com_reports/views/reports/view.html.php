@@ -37,7 +37,7 @@ class ReportsViewReports extends HtmlView
         }
         if (ReportsHelper::canDo('core.delete'))
         {
-            JToolbarHelper::deleteList('COM_REPORTS_DELETE_QUESTION_REPORT', 'reports.delete');
+            JToolbarHelper::deleteList('COM_REPORTS_DELETE_QUESTION_REPORT', 'cron.delete');
         }
         if (ReportsHelper::canDo('core.admin'))
         {

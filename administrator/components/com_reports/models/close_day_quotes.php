@@ -6,7 +6,7 @@ defined('_JEXEC') or die;
 /**
  * Сравнение проданных элементов по разным проектам
  *
- * @package   reports
+ * @package   cron
  * @since     1.0.0
  */
 class ReportsModelClose_day_quotes extends ListModel
@@ -164,7 +164,7 @@ class ReportsModelClose_day_quotes extends ListModel
         }
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
         $t = time();
-        $path_full = JPATH_SITE . "/reports/Close_day_quotes_{$t}.xls";
+        $path_full = JPATH_SITE . "/cron/Close_day_quotes_{$t}.xls";
         $filename = "Close_day_quotes_{$t}.xls";
         $objWriter->save((!$this->save) ? 'php://output' : $path_full);
         if ($this->save) {

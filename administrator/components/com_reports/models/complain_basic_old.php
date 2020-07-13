@@ -6,7 +6,7 @@ defined('_JEXEC') or die;
 /**
  * Сравнение проданных элементов по разным проектам
  *
- * @package   reports
+ * @package   cron
  * @since     1.0.0
  */
 class ReportsModelComplain_basic_old extends ListModel
