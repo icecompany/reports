@@ -29,7 +29,7 @@ class ReportsViewReports extends HtmlView
 
     private function toolbar()
     {
-        JToolBarHelper::title(JText::sprintf('COM_REPORTS_REPORTS'), 'flash');
+        JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_MY_REPORTS'), 'flash');
 
         if (ReportsHelper::canDo('core.edit'))
         {
