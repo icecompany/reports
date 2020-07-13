@@ -26,4 +26,114 @@
                 type="hidden"
         />
     </fieldset>
+    <fieldset name="cron">
+        <field
+                name="cron_enabled"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_CRON_ENABLED_LABEL"
+                description="COM_REPORTS_FORM_REPORT_CRON_ENABLED_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_1"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_1_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_1_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_2"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_2_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_2_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_3"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_3_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_3_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_4"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_4_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_4_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_5"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_5_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_5_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_6"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_6_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_6_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="day_7"
+                type="radio"
+                label="COM_REPORTS_FORM_REPORT_DAY_7_LABEL"
+                description="COM_REPORTS_FORM_REPORT_DAY_7_DESC"
+                default="0"
+                class="btn-group btn-group-yesno"
+        >
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+        <field
+                name="cron_hour"
+                type="integer"
+                label="COM_REPORTS_FORM_REPORT_CRON_HOUR_LABEL"
+                description="COM_REPORTS_FORM_REPORT_CRON_HOUR_DESC"
+                default="0"
+                first="0"
+                last="23"
+                step="1"
+        />
+        <field
+                name="cron_minute"
+                type="integer"
+                label="COM_REPORTS_FORM_REPORT_CRON_MINUTE_LABEL"
+                description="COM_REPORTS_FORM_REPORT_CRON_MINUTE_DESC"
+                default="0"
+                first="0"
+                last="59"
+                step="1"
+        />
+    </fieldset>
 </form>

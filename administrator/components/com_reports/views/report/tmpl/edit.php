@@ -22,7 +22,7 @@ HTMLHelper::_('script', 'com_reports/report.js', array('version' => 'auto', 'rel
                         <div><?php echo $this->loadTemplate('general'); ?></div>
                     </div>
                     <div class="span6">
-
+                        <div><?php echo $this->loadTemplate('cron'); ?></div>
                     </div>
                 </div>
                 <?php echo JHtml::_('bootstrap.endTab'); ?>
