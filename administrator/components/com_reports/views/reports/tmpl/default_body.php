@@ -17,9 +17,11 @@ foreach ($this->items['items'] as $i => $item) :
         <td>
             <?php echo $item['type']; ?>
         </td>
-        <td>
-            <?php echo $item['manager']; ?>
-        </td>
+        <?php if (ReportsHelper::canDo('core.reports.all')): ?>
+            <td>
+                <?php echo $item['manager']; ?>
+            </td>
+        <?php endif; ?>
         <td>
             <?php echo $item['id']; ?>
         </td>
