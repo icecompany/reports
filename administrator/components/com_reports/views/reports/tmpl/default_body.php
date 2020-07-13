@@ -12,7 +12,7 @@ foreach ($this->items['items'] as $i => $item) :
             <?php echo ++$ii; ?>
         </td>
         <td>
-            <?php echo $item['edit_link']; ?>
+            <?php echo $item['report_link']; ?>
         </td>
         <td>
             <?php echo $item['type']; ?>

@@ -301,6 +301,14 @@ class ReportsModelCompanies extends ListModel
         JFactory::getApplication()->redirect($uri->toString());
     }
 
+    public function getReport() {
+        $reportID = JFactory::getApplication()->input->getInt('reportID', 0);
+        if ($reportID === 0) return;
+        $table = JTable::getInstance('Reports', 'TableReports');
+        $table->load($reportID);
+        return $table;
+    }
+
     private function getStands(array $ids = []): array
     {
         if (empty($ids)) return [];

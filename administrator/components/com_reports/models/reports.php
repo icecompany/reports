@@ -74,6 +74,15 @@ class ReportsModelReports extends ListModel
             $arr['type'] = $item->type_show;
             $url = JRoute::_("index.php?option={$this->option}&amp;task=report.edit&amp;id={$item->id}&amp;return={$return}");
             $arr['edit_link'] = JHtml::link($url, $item->title);
+            $params = json_decode($item->params);
+            $tmp = ["option" => $this->option, "view" => $item->type, 'reportID' => $item->id];
+            foreach ($params as $field => $val) {
+                if ($val === null) continue;
+                $tmp["filter_{$field}"] = $val;
+            }
+            $query = http_build_query($tmp);
+            $url = JRoute::_("index.php?" . $query);
+            $arr['report_link'] = JHtml::link($url, $item->title);
             $result['items'][] = $arr;
         }
         return $result;

@@ -6,7 +6,7 @@ defined('_JEXEC') or die;
 class ReportsViewCompanies extends HtmlView
 {
     protected $sidebar = '';
-    public $items, $pagination, $uid, $state, $filterForm, $activeFilters;
+    public $items, $pagination, $uid, $state, $filterForm, $activeFilters, $report;
 
     public function display($tpl = null)
     {
@@ -15,6 +15,7 @@ class ReportsViewCompanies extends HtmlView
         $this->state = $this->get('State');
         $this->filterForm = $this->get('FilterForm');
         $this->activeFilters = $this->get('ActiveFilters');
+        $this->report = $this->get('Report');
 
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_contracts/models/fields");
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_mkv/models/fields");
@@ -33,7 +34,9 @@ class ReportsViewCompanies extends HtmlView
 
     private function toolbar()
     {
-        JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_COMPANIES'), 'screen');
+        $title = JText::sprintf('COM_REPORTS_MENU_COMPANIES');
+        if ($this->report->title !== null) $title .= " - {$this->report->title}";
+        JToolBarHelper::title($title, 'screen');
         JToolbarHelper::custom('companies.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
         JToolbarHelper::custom('companies.save_report', 'plus', 'plus', JText::sprintf('COM_REPORTS_BUTTON_SAVE_REPORT'), false);
         if (ReportsHelper::canDo('core.admin'))

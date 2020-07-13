@@ -22,14 +22,6 @@
             <option value="companies">COM_REPORTS_FORM_REPORT_TYPE_COMPANIES</option>
         </field>
         <field
-                name="params"
-                type="hidden"
-        />
-        <field
-                name="type_show"
-                type="hidden"
-        />
-        <field
                 name="id"
                 type="hidden"
         />
