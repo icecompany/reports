@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metadata>
+    <layout title="COM_REPORTS_PAGE_REPORT">
+        <message>
+            <![CDATA[COM_REPORTS_PAGE_REPORT_DESC]]>
+		</message>
+    </layout>
+    <fieldset name="request">
+        <fields name="request">
+            <field
+                    name="id"
+                    type="hidden"
+                    default="0"
+            />
+        </fields>
+    </fieldset>
+</metadata>
