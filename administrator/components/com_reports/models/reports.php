@@ -37,10 +37,12 @@ class ReportsModelReports extends ListModel
             ->leftJoin("#__users u on u.id = r.managerID");
 
         if ($this->cron) {
-            $query->where("r.cron_enabled = 1");
             $dat = JDate::getInstance('+3 hour');
-            $query->where("r.cron_hour = {$this->_db->q($dat->hour)}");
-            $query->where("r.cron_minute = {$this->_db->q($dat->minute)}");
+            $query
+                ->where("r.cron_enabled = 1")
+                ->where("r.day_{$dat->dayofweek} = 1")
+                ->where("r.cron_hour = {$this->_db->q($dat->hour)}")
+                ->where("r.cron_minute = {$this->_db->q($dat->minute)}");
         }
 
         if (!ReportsHelper::canDo('core.cron.all') && !$this->cron) {

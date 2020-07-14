@@ -105,6 +105,7 @@ class ReportsModelCompanies extends ListModel
         }
 
         $project = PrjHelper::getActiveProject();
+        if ($this->cron) $project = MkvHelper::getConfig('default_project');
         if (is_numeric($project)) {
             $query->where("c.projectID = {$this->_db->q($project)}");
         }
@@ -380,14 +381,16 @@ class ReportsModelCompanies extends ListModel
     {
         $search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
         $this->setState('filter.search', $search);
-        $manager = $this->getUserStateFromRequest($this->context . '.filter.manager', 'filter_manager');
-        $this->setState('filter.manager', $manager);
-        $status = $this->getUserStateFromRequest($this->context . '.filter.status', 'filter_status');
-        $this->setState('filter.status', $status);
-        $fields = $this->getUserStateFromRequest($this->context . '.filter.fields', 'filter_fields');
-        $this->setState('filter.fields', $fields);
-        $item = $this->getUserStateFromRequest($this->context . '.filter.item', 'filter_item');
-        $this->setState('filter.item', $item);
+        if (!$this->cron) {
+            $manager = $this->getUserStateFromRequest($this->context . '.filter.manager', 'filter_manager');
+            $this->setState('filter.manager', $manager);
+            $status = $this->getUserStateFromRequest($this->context . '.filter.status', 'filter_status');
+            $this->setState('filter.status', $status);
+            $fields = $this->getUserStateFromRequest($this->context . '.filter.fields', 'filter_fields');
+            $this->setState('filter.fields', $fields);
+            $item = $this->getUserStateFromRequest($this->context . '.filter.item', 'filter_item');
+            $this->setState('filter.item', $item);
+        }
         parent::populateState($ordering, $direction);
         ReportsHelper::check_refresh();
     }

@@ -21,7 +21,7 @@ class ReportsControllerCron extends BaseController
                 $model->export($report['managerID'], $report['title']);
             }
         }
-        die('Success');
+        die(date('Y-m-d H:i:s') . ': Success');
     }
 
     private function getReports(): array {
