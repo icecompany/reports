@@ -19,8 +19,14 @@ class ReportsControllerCron extends BaseController
                 if ($params['status'] !== null && !empty($params['status'])) $model->setState('filter.status', $params['status']);
                 if ($params['fields'] !== null && !empty($params['fields'])) $model->setState('filter.fields', $params['fields']);
                 $model->export($report['managerID'], $report['title']);
+                $notify = [];
+                $notify['managerID'] = $report['managerID'];
+                $notify['contractID'] = NULL;
+                $notify['text'] = JText::sprintf('COM_REPORTS_MSG_REPORT_HAS_SENT', $report['title'], JFactory::getUser($report['managerID'])->email);
+                SchedulerHelper::sendNotify($notify);
             }
         }
+
         die(date('Y-m-d H:i:s') . ': Success');
     }
 
