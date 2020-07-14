@@ -56,7 +56,7 @@ class ReportsModelClose_day_quotes extends ListModel
             ->leftJoin("#__mkv_contracts c on ci.contractID = c.id")
             ->leftJoin("#__mkv_companies e on c.companyID = e.id")
             ->leftJoin("#__users u on u.id = c.managerID")
-            ->where("(c.projectID = 11 and pi.square_type is not null and s.id is not null)")
+            ->where("(c.projectID = 11 and pi.square_type is not null and s.id is not null and c.status != 0)")
             ->group("pavilion, stand, company, manager, c.companyID, ci.contractID")
             ->order("stand");
         $project = PrjHelper::getActiveProject();

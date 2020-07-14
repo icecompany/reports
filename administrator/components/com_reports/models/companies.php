@@ -133,7 +133,7 @@ class ReportsModelCompanies extends ListModel
             $item_ids = implode(', ', $item);
             $query
                 ->leftJoin("#__mkv_contract_items ci on ci.contractID = c.id")
-                ->where("ci.itemID in ({$item_ids})");
+                ->where("(ci.itemID in ({$item_ids}) and ci.value > 0)");
         }
         $limit = (!$this->export) ? $this->getState('list.limit') : 0;
         $this->setState('list.limit', $limit);
