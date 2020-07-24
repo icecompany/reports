@@ -42,8 +42,8 @@ class ReportsModelClose_day_quotes extends ListModel
         $query
             ->select("sp.title as pavilion")
             ->select("s.number as stand")
-            ->select("sum(if(square_type=1, s.square,if(square_type=2, s.square,if(square_type=5, s.square, if(square_type=7, s.square, if(square_type=8, s.square, 0)))))) as in_pavilion")
-            ->select("sum(if(square_type=3, s.square,if(square_type=4, s.square,if(square_type=6, s.square, 0)))) as in_street")
+            ->select("sum(if(square_type=1, ci.value,if(square_type=2, ci.value,if(square_type=5, ci.value, if(square_type=7, ci.value, if(square_type=8, ci.value, 0)))))) as in_pavilion")
+            ->select("sum(if(square_type=3, ci.value,if(square_type=4, ci.value,if(square_type=6, ci.value, 0)))) as in_street")
             ->select("e.title as company")
             ->select("u.name as manager")
             ->select("c.companyID")
@@ -78,6 +78,7 @@ class ReportsModelClose_day_quotes extends ListModel
         $result = ['items' => [], 'total' => 0];
         $items = parent::getItems();
         $cid = [];
+        $tmp = [];
 
         foreach ($items as $item) {
             if (!isset($result['items'][$item->companyID])) {
@@ -106,6 +107,7 @@ class ReportsModelClose_day_quotes extends ListModel
                 $result['items'][$item->companyID]['in_street'] += $item->in_street;
             }
             $result['items'][$item->companyID]['total'] += $result['items'][$item->companyID]['quotes_pavilion'] + $result['items'][$item->companyID]['quotes_street'];
+            if ($item->companyID == 10167) $tmp[] = $item;
         }
         $regs = $this->getRegs($cid);
         foreach ($result['items'] as $companyID => $arr) {
