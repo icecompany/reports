@@ -7,7 +7,7 @@
 	<authorUrl>http://your.xakepok.com</authorUrl>
 	<copyright>A copyright</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>1.2.2-patch.1</version>
+	<version>1.2.3</version>
 	<description>COM_REPORTS_XML_DESCRIPTION</description>
 
 	<!-- Scripts to run on installation -->
@@ -55,6 +55,7 @@
 				XML and be parsed by the installer
 			-->
 			<menu view="companies">COM_REPORTS_MENU_COMPANIES</menu>
+			<menu view="sales">COM_REPORTS_TITLE_SALES</menu>
 			<menu view="close_day_quotes">COM_REPORTS_MENU_CLOSE_DAY_QUOTES</menu>
 			<menu view="welcome">COM_REPORTS_MENU_WELCOME</menu>
 			<menu view="contracts_statuses">COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES</menu>
