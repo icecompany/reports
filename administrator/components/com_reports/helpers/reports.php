@@ -9,6 +9,7 @@ class ReportsHelper
 	{
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_MY_REPORTS'), 'index.php?option=com_reports&view=reports', $vName === 'reports');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_COMPANIES'), 'index.php?option=com_reports&view=companies', $vName === 'companies');
+		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_TITLE_SALES'), 'index.php?option=com_reports&view=sales', $vName === 'sales');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_CLOSE_DAY_QUOTES'), 'index.php?option=com_reports&view=close_day_quotes', $vName === 'close_day_quotes');
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_WELCOME'), 'index.php?option=com_reports&view=welcome', $vName === 'welcome');
         HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_INVITES'), 'index.php?option=com_reports&view=invites', $vName === 'invites');
