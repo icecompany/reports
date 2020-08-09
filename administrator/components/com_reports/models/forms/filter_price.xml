@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldpath="administrator/components/com_reports/models/fields/">
+    <fields name="filter">
+        <field
+                name="search"
+                type="text"
+                label="COM_REPORTS_FILTER_COMPANY"
+                description="COM_REPORTS_FILTER_COMPANY"
+                hint="COM_REPORTS_FILTER_COMPANY"
+                autocomplete="off"
+                class="js-stools-search-string"
+        />
+        <field
+                name="items"
+                type="PriceItem"
+                multiple="true"
+                onchange="this.form.submit();"
+        />
+        <field
+                name="status"
+                type="ContractStatus"
+                multiple="true"
+                default="[]"
+                onchange="this.form.submit();"
+        >
+            <option value="101">COM_MKV_STATUS_IN_PROJECT</option>
+        </field>
+    </fields>
+    <fields name="list">
+        <field
+                name="fullordering"
+                type="hidden"
+        />
+        <field
+                name="limit"
+                type="limitbox"
+                class="input-mini"
+                default="0"
+                label="COM_REPORTS_FILTER_ITEM"
+                description="COM_REPORTS_FILTER_ITEM"
+                onchange="this.form.submit();"
+        />
+    </fields>
+</form>
