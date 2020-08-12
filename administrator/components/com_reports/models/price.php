@@ -19,6 +19,7 @@ class ReportsModelPrice extends ListModel
                 'items',
                 'status',
                 'search',
+                'contract_number',
             );
         }
         parent::__construct($config);
@@ -32,7 +33,7 @@ class ReportsModelPrice extends ListModel
             ->select("u.name as manager, e.site")
             ->select("ci.itemID, ci.value")
             ->select("i.title as item, i.square_type, i.type")
-            ->select("c.id as contractID")
+            ->select("c.id as contractID, ifnull(c.number_free, c.number) as contract_number")
             ->from("#__mkv_contract_items ci")
             ->leftJoin("#__mkv_price_items i on i.id = ci.itemID")
             ->leftJoin("#__mkv_price_sections ps on ps.id = i.sectionID")
@@ -59,6 +60,11 @@ class ReportsModelPrice extends ListModel
                 $query->where("c.status in ({$statuses})");
             }
         }
+
+        $manager = $this->getState('filter.manager');
+        if (is_numeric($manager)) {
+            $query->where("c.managerID = {$this->_db->q($manager)}");
+        }
         $search = $this->setState('filter.search');
         if (!empty($search)) {
             $text = $this->_db->q("%{$search}%");
@@ -81,6 +87,7 @@ class ReportsModelPrice extends ListModel
             if (!isset($result['price'][$item->itemID])) $result['price'][$item->itemID] = $item->item;
             if (!isset($result['items'][$item->companyID])) {
                 $result['items'][$item->companyID]['company'] = $item->company;
+                $result['items'][$item->companyID]['contract_number'] = $item->contract_number;
                 $result['items'][$item->companyID]['manager'] = MkvHelper::getLastAndFirstNames($item->manager);
                 $result['items'][$item->companyID]['price'] = [];
             }
@@ -105,23 +112,24 @@ class ReportsModelPrice extends ListModel
         $sheet->getStyle("A2")->getFont()->setBold(true);
 
         //Ширина столбцов
-        $width = ["A" => 60, "B" => 20];
+        $width = ["A" => 19, "B" => 60, "C" => 20];
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
 
-        $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_COMPANY'));
-        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_MANAGER'));
-        $col = 2;
+        $sheet->setCellValue("A1", JText::sprintf('COM_MKV_HEAD_CONTRACT_NUMBER'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_COMPANY'));
+        $sheet->setCellValue("C1", JText::sprintf('COM_REPORTS_HEAD_MANAGER'));
+        $col = 3;
         foreach ($items['price'] as $id => $title) {
             $sheet->setCellValueByColumnAndRow($col, 1, $title);
             $col++;
         }
 
         //Итого
-        $sheet->mergeCells("A2:B2");
+        $sheet->mergeCells("A2:C2");
         $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
         $sheet->getStyle("A2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
-        $col = 2;
+        $col = 3;
         foreach ($items['price'] as $itemID => $title) {
             $sheet->setCellValueByColumnAndRow($col, 2, $items['total'][$itemID] ?? 0);
             $col++;
@@ -131,16 +139,17 @@ class ReportsModelPrice extends ListModel
 
         //Данные. Один проход цикла - одна строка
         $row = 3; //Строка, с которой начнаются данные
-        $col = 2;
+        $col = 3;
         foreach ($items['items'] as $companyID => $company) {
-            $sheet->setCellValue("A{$row}", $company['company']);
-            $sheet->setCellValue("B{$row}", $company['manager']);
+            $sheet->setCellValue("A{$row}", $company['contract_number']);
+            $sheet->setCellValue("B{$row}", $company['company']);
+            $sheet->setCellValue("C{$row}", $company['manager']);
             foreach ($items['price'] as $itemID => $title) {
                 $sheet->setCellValueByColumnAndRow($col, $row, $items['items'][$companyID]['price'][$itemID] ?? 0);
                 $col++;
             }
             $row++;
-            $col = 2;
+            $col = 3;
         }
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
@@ -170,6 +179,8 @@ class ReportsModelPrice extends ListModel
         $this->setState('filter.items', $items);
         $status = $this->getUserStateFromRequest($this->context . '.filter.status', 'filter_status');
         $this->setState('filter.status', $status);
+        $manager = $this->getUserStateFromRequest($this->context . '.filter.manager', 'filter_manager');
+        $this->setState('filter.manager', $manager);
         ReportsHelper::check_refresh();
     }
 
@@ -178,6 +189,7 @@ class ReportsModelPrice extends ListModel
         $id .= ':' . $this->getState('filter.search');
         $id .= ':' . $this->getState('filter.items');
         $id .= ':' . $this->getState('filter.status');
+        $id .= ':' . $this->getState('filter.manager');
         return parent::getStoreId($id);
     }
 }

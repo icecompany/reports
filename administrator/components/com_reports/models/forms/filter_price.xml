@@ -11,6 +11,13 @@
                 class="js-stools-search-string"
         />
         <field
+                name="manager"
+                type="Manager"
+                onchange="this.form.submit();"
+        >
+            <option value="">COM_MKV_FILTER_SELECT_MANAGER</option>
+        </field>
+        <field
                 name="items"
                 type="PriceItem"
                 multiple="true"
@@ -20,7 +27,6 @@
                 name="status"
                 type="ContractStatus"
                 multiple="true"
-                default="[]"
                 onchange="this.form.submit();"
         >
             <option value="101">COM_MKV_STATUS_IN_PROJECT</option>
