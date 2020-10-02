@@ -67,6 +67,8 @@ class ReportsModelSales extends ListModel
             if (!isset($result['items'][$item->itemID])) {
                 $result['items'][$item->itemID] = [];
                 $result['items'][$item->itemID]['item'] = $item->price_item;
+                $url = JRoute::_("index.php?option=com_contracts&amp;view=items&amp;itemID={$item->itemID}");
+                if (!$this->export) $result['items'][$item->itemID]['item'] = JHtml::link($url, $result['items'][$item->itemID]['item'], ['target' => "_blank"]);
                 $result['items'][$item->itemID]['rub'] = 0;
                 $result['items'][$item->itemID]['usd'] = 0;
                 $result['items'][$item->itemID]['eur'] = 0;
