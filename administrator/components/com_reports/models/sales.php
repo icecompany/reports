@@ -78,14 +78,14 @@ class ReportsModelSales extends ListModel
                 $result['total'][$item->itemID]['eur'] = 0;
             }
             $currency = mb_strtoupper($item->currency);
-            $amount = number_format((float) $item->amount, 2, '.', ' ');
+            $amount = number_format((float) $item->amount, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, MKV_FORMAT_SEPARATOR_DEC);
             $result['items'][$item->itemID]['count'] += $item->cnt;
-            $result['items'][$item->itemID][$item->currency] = (!$this->export) ? JText::sprintf("COM_REPORTS_HEAD_COMPLAIN_BASIC_OLD_AMOUNT_{$currency}_SUM", $amount) : $item->amount;
+            $result['items'][$item->itemID][$item->currency] = (!$this->export) ? JText::sprintf("COM_REPORTS_HEAD_COMPLAIN_BASIC_OLD_AMOUNT_{$currency}_SUM", $amount) : number_format((float) $item->amount, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
             $result['total'][$item->currency] += $item->amount;
         }
         if (!$this->export) {
             foreach (['rub', 'usd', 'eur'] as $currency) {
-                $amount = number_format((float) $result['total'][$currency], 2, '.', ' ');
+                $amount = number_format((float) $result['total'][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, MKV_FORMAT_SEPARATOR_DEC);
                 $up = mb_strtoupper($currency);
                 $result['total'][$currency] = JText::sprintf("COM_REPORTS_HEAD_COMPLAIN_BASIC_OLD_AMOUNT_{$up}_SUM", $amount);
             }

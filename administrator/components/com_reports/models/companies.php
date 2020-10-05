@@ -179,13 +179,13 @@ class ReportsModelCompanies extends ListModel
                         $result['items'][$item->contractID]['phones'] = implode(', ', $phones);
                     } else unset($this->heads['phones']);
                     if (in_array('contract_amount', $fields)) {
-                        $result['items'][$item->contractID]['contract_amount'] = $item->contract_amount;
+                        $result['items'][$item->contractID]['contract_amount'] = number_format((float) $item->contract_amount, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
                     } else unset($this->heads['contract_amount']);
                     if (in_array('contract_payments', $fields)) {
-                        $result['items'][$item->contractID]['contract_payments'] = $item->contract_payments;
+                        $result['items'][$item->contractID]['contract_payments'] = number_format((float) $item->contract_payments, MKV_FORMAT_DEC_COUNT,MKV_FORMAT_SEPARATOR_FRACTION, '');
                     } else unset($this->heads['contract_payments']);
                     if (in_array('contract_debt', $fields)) {
-                        $result['items'][$item->contractID]['contract_debt'] = $item->contract_debt;
+                        $result['items'][$item->contractID]['contract_debt'] = number_format((float) $item->contract_debt, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
                     } else unset($this->heads['contract_debt']);
                     if (in_array('manager', $fields)) {
                         $result['items'][$item->contractID]['manager'] = MkvHelper::getLastAndFirstNames($item->manager);
