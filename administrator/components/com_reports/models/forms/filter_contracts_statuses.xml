@@ -20,21 +20,15 @@
     <fields name="list">
         <field
                 name="fullordering"
-                type="list"
-                label="COM_REPORTS_FILTER_ITEM"
-                description="COM_REPORTS_FILTER_ITEM"
-                onchange="this.form.submit();"
-                default="e.title ASC"
-        >
-            <option value="">JGLOBAL_SORT_BY</option>
-        </field>
+                type="hidden"
+        />
         <field
                 name="limit"
                 type="limitbox"
                 class="input-mini"
-                default="0"
                 label="COM_REPORTS_FILTER_ITEM"
                 description="COM_REPORTS_FILTER_ITEM"
+                default="10"
                 onchange="this.form.submit();"
         />
     </fields>

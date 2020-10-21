@@ -3,12 +3,6 @@ use Joomla\CMS\MVC\Model\ListModel;
 
 defined('_JEXEC') or die;
 
-/**
- * Сравнение проданных элементов по разным проектам
- *
- * @package   cron
- * @since     1.0.0
- */
 class ReportsModelContracts_statuses extends ListModel
 {
     public function __construct($config = array())
@@ -17,13 +11,13 @@ class ReportsModelContracts_statuses extends ListModel
             $config['filter_fields'] = array(
                 'manager',
                 'projects',
+                'e.title',
                 'date',
             );
         }
         parent::__construct($config);
         $input = JFactory::getApplication()->input;
-        $format = $input->getString('format', 'html');
-        $this->export = ($format !== 'html');
+        $this->export = ($input->getString('format', 'html') === 'html') ? false : true;
     }
 
     protected function _getListQuery()
@@ -36,18 +30,13 @@ class ReportsModelContracts_statuses extends ListModel
             ->from("#__mkv_companies e")
             ->leftJoin("#__mkv_contracts c on c.companyID = e.id")
             ->leftJoin("#__mkv_contract_statuses s on s.code = c.status");
-        $projects = $this->getState('filter.projects');
-        if (is_numeric($projects)) {
-            $ids = implode(', ', $projects);
-            $query->where("c.projectID in ($ids)");
-        }
         $search = $this->setState('filter.search');
         if (!empty($search)) {
             $text = $this->_db->q("%{$search}%");
             $query->where("e.title like {$text}");
         }
-        $limit = (!$this->export) ? 100 : 0;
-        $this->setState('list.limit', $limit);
+
+        $this->setState('list.limit', (!$this->export) ? $this->state->get('list.limit') : 0);
 
         return $query;
     }
@@ -139,8 +128,9 @@ class ReportsModelContracts_statuses extends ListModel
     {
         $search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
         $this->setState('filter.search', $search);
-        $projects = $this->getUserStateFromRequest($this->context . '.filter.projects', 'filter_projects', [5, 11]);
+        $projects = $this->getUserStateFromRequest($this->context . '.filter.projects', 'filter_projects', [11, 12], 'array', false);
         $this->setState('filter.projects', $projects);
+        parent::populateState($ordering, $direction);
         PrjHelper::check_refresh();
     }
 

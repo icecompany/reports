@@ -6,7 +6,7 @@ defined('_JEXEC') or die;
 class ReportsViewContracts_statuses extends HtmlView
 {
     protected $sidebar = '';
-    public $items, $pagination, $state, $filterForm, $activeFilters;
+    public $items, $pagination, $state, $filterForm, $activeFilters, $return;
 
     public function display($tpl = null)
     {
@@ -15,10 +15,12 @@ class ReportsViewContracts_statuses extends HtmlView
         $this->state = $this->get('State');
         $this->filterForm = $this->get('FilterForm');
         $this->activeFilters = $this->get('ActiveFilters');
+        $this->return = ReportsHelper::getReturnUrl();
 
         $this->filterForm->setValue('projects', 'filter', $this->state->get('filter.projects'));
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_prj/models/fields");
         $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_mkv/models/fields");
+        $this->filterForm->addFieldPath(JPATH_ADMINISTRATOR . "/components/com_contracts/models/fields");
 
         // Show the toolbar
         $this->toolbar();
