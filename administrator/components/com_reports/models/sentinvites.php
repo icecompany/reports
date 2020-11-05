@@ -228,8 +228,8 @@ class ReportsModelSentInvites extends ListModel
             $sheet->setCellValue("Q{$row}", $items['week'][$managerID][10]);
             $sheet->setCellValue("R{$row}", $items['statuses'][$managerID][10]);
             $sheet->setCellValue("S{$row}", $items['dynamic'][$managerID][10]);
-            $sheet->setCellValue("T{$row}", $item['today']);
-            $sheet->setCellValue("U{$row}", $item['week']);
+            $sheet->setCellValue("T{$row}", $item['week']);
+            $sheet->setCellValue("U{$row}", $item['today']);
             $sheet->setCellValue("V{$row}", $item['dynamic']);
             $row++;
         }
