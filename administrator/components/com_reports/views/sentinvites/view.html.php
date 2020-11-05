@@ -16,6 +16,9 @@ class ReportsViewSentInvites extends HtmlView
         $this->filterForm = $this->get('FilterForm');
         $this->activeFilters = $this->get('ActiveFilters');
 
+        $this->filterForm->setValue('date_1', 'filter', $this->state->get('filter.date_1'));
+        $this->filterForm->setValue('date_2', 'filter', $this->state->get('filter.date_2'));
+
         // Show the toolbar
         $this->toolbar();
 

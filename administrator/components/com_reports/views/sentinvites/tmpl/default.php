@@ -28,6 +28,7 @@ HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'rel
     <div id="j-main-container" class="span10">
         <form action="<?php echo ReportsHelper::getActionUrl(); ?>" method="post"
               name="adminForm" id="adminForm">
+            <?php echo JLayoutHelper::render('joomla.searchtools.default', array('view' => $this)); ?>
             <?php
             $text = (!is_numeric(PrjHelper::getActiveProject())) ? 'COM_REPORTS_MSG_PROJECT_IS_NOT_SELECTED' : 'COM_REPORTS_MSG_DATA_IS_LOAD';
             echo JText::sprintf($text);
