@@ -7,7 +7,7 @@
 	<authorUrl>http://your.xakepok.com</authorUrl>
 	<copyright>A copyright</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<version>1.2.10</version>
+	<version>1.2.10-patch.1</version>
 	<description>COM_REPORTS_XML_DESCRIPTION</description>
 
 	<!-- Scripts to run on installation -->
