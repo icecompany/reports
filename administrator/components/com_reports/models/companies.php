@@ -226,6 +226,10 @@ class ReportsModelCompanies extends ListModel
             $thematics = $this->getThematics(array_keys($result['items'] ?? []));
             foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['thematics'] = $thematics[$contractID];
         } else unset($this->heads['thematics']);
+        if (in_array('activities', $fields)) {
+            $activities = $this->getActivities($companyIDs ?? []);
+            foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['activities'] = $activities[$item['companyID']];
+        } else unset($this->heads['activities']);
         return $result;
     }
 
@@ -353,6 +357,21 @@ class ReportsModelCompanies extends ListModel
         $items = $model->getItems();
         $result = [];
         foreach ($items as $contractID => $thematics) $result[$contractID] = implode(', ', $thematics);
+        return $result;
+    }
+
+    private function getActivities(array $ids = []): array
+    {
+        if (empty($ids)) return [];
+        JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_companies/models", "CompaniesModel");
+        $model = JModelLegacy::getInstance('Companies_activities', 'CompaniesModel', ['companyIDs' => $ids]);
+        $items = $model->getItems();
+        $result = [];
+        foreach ($items as $activity) {
+            if (!isset($result[$activity['companyID']])) $result[$activity['companyID']] = [];
+            $result[$activity['companyID']][] = $activity['activity'];
+        }
+        foreach($result as $companyID => $activities) $result[$companyID] = implode(', ', $activities);
         return $result;
     }
 

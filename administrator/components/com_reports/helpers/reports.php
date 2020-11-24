@@ -45,6 +45,7 @@ class ReportsHelper
             'address_legal' => 'COM_REPORTS_HEAD_ADDRESS_LEGAL',
             'address_fact' => 'COM_REPORTS_HEAD_ADDRESS_FACT',
             'thematics' => 'COM_REPORTS_HEAD_THEMATICS',
+            'activities' => 'COM_REPORTS_HEAD_COMPANY_ACTIVITIES',
         ];
         return $heads[$type];
 	}
