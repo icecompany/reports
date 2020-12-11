@@ -308,6 +308,7 @@ class ReportsModelSentInvites extends ListModel
         $row = 4; //Строка, с которой начнаются данные
         foreach ($items['items'] as $managerID => $item) {
             if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
+            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
             $sheet->setCellValue("B{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $sheet->setCellValue("C{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $sheet->setCellValue("D{$row}", $items['payments'][$managerID]['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
