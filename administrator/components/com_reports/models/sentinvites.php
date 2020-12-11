@@ -43,23 +43,29 @@ class ReportsModelSentInvites extends ListModel
         $query = $this->_db->getQuery(true);
         $query
             ->select("u.name as manager")
-            ->select("ms.dat, ms.managerID")
+            ->select("ms.*")
             ->select("ms.status_0 + ms.status_1 + ms.status_2 + ms.status_3 + ms.status_4 + ms.status_10 as invites")
-            ->select("ms.status_0, ms.status_1, ms.status_2, ms.status_3, ms.status_4, ms.status_10")
             ->from("#__mkv_managers_stat ms")
             ->leftJoin("s7vi9_users u on ms.managerID = u.id");
-        $project = PrjHelper::getActiveProject();
-        if (is_numeric($project)) {
-            $query->where("ms.projectID = {$this->_db->q($project)}");
-        }
 
+        $project = PrjHelper::getActiveProject();
         $date_1 = $this->getState('filter.date_1');
         $date_2 = $this->getState('filter.date_2');
-        if (!empty($date_1) && !empty($date_2) && $date_1 !== '0000-00-00 00:00:00' && $date_2 !== '0000-00-00 00:00:00')
-        {
-            $d1 = JDate::getInstance($date_1)->format("Y-m-d");
-            $d2 = JDate::getInstance($date_2)->format("Y-m-d");
-            $query->where("(ms.dat = {$this->_db->q($d1)} or ms.dat = {$this->_db->q($d2)})");
+
+        if (is_numeric($project)) {
+            if (!empty($date_1) && !empty($date_2) && $date_1 !== '0000-00-00 00:00:00' && $date_2 !== '0000-00-00 00:00:00') {
+                $d1 = JDate::getInstance($date_1)->format("Y-m-d");
+                $d2 = JDate::getInstance($date_2)->format("Y-m-d");
+                $diff = JDate::getInstance($date_2)->diff(JDate::getInstance($date_1));
+                if ($diff->days > 350) {
+                    $previous = PrjHelper::getPreviousProject($project);
+                    if (is_numeric($previous)) {
+                        $query->where("((ms.projectID = {$this->_db->q($previous)} and ms.dat = {$this->_db->q($d1)}) or (ms.projectID = {$this->_db->q($project)} and ms.dat = {$this->_db->q($d2)}))");
+                    }
+                } else {
+                    $query->where("(ms.projectID = {$this->_db->q($project)} and ((ms.dat = {$this->_db->q($d1)}) or (ms.dat = {$this->_db->q($d2)})))");
+                }
+            }
         }
 
         $search = $this->getState('filter.search');
@@ -80,7 +86,7 @@ class ReportsModelSentInvites extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'statuses' => [], 'week' => [], 'dynamic' => [], 'managers' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
+        $result = ['items' => [], 'statuses' => [], 'week' => [], 'dynamic' => [], 'managers' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
         $items = parent::getItems();
         foreach ($items as $item) {
             $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
@@ -135,12 +141,18 @@ class ReportsModelSentInvites extends ListModel
             }
         }
         $result['total']['dynamic'] = (int) $result['total']['today'] - (int) $result['total']['week'];
+
+        $project = PrjHelper::getActiveProject();
+        $previous = PrjHelper::getPreviousProject($project);
+        $result['payments'] = $this->getPayments($previous, $project);
+
         foreach ([0, 1, 2, 3, 4, 10] as $status) {
             foreach ($result['managers'] as $managerID => $manager) {
                 $result['dynamic'][$managerID][$status] = $result['statuses'][$managerID][$status] - $result['week'][$managerID][$status];
             }
             $result['total']['dynamic_by_statuses'][$status] = (int) $result['total']['statuses'][$status] - (int) $result['total']['statuses_week'][$status];
         }
+
         return $result;
     }
 
@@ -160,50 +172,67 @@ class ReportsModelSentInvites extends ListModel
         $statuses = $this->loadContractStatuses();
 
         //Объединение ячеек
-        $merge = ["B1:D1", "E1:G1", "H1:J1", "K1:M1", "N1:P1", "Q1:S1", "T1:V1"];
+        $merge = ["B1:V1", "B2:D2", "E2:G2", "H2:J2", "K2:M2", "N2:P2", "Q2:S2", "T2:V2", "W1:AE1", "W2:Y2", "Z2:AB2", "AC2:AE2"];
         foreach ($merge as $cell) $sheet->mergeCells($cell);
-        $sheet->getStyle("B1:T1")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("B1:AE3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->freezePane("B4");
 
         //Ширина столбцов
         $width = ["A" => 20, "B" => 10, "C" => 10, "D" => 10, "E" => 10, "F" => 10, "G" => 10, "H" => 10, "I" => 10, "J" => 10, "K" => 10, "L" => 10, "M" => 10,
-            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 20, "U" => 20, "V" => 10];
+            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 20, "U" => 20, "V" => 10,
+            "W" => 14, "X" => 11, "Y" => 11, "Z" => 14, "AA" => 11, "AB" => 11, "AC" => 14, "AD" => 11, "AE" => 11];
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
         //Заголовки
         $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_STATUS'));
-        $sheet->setCellValue("A2", JText::sprintf('COM_MKV_HEAD_MANAGER'));
-        $sheet->setCellValue("B1", $statuses[0]);
-        $sheet->setCellValue("B2", $date_1);
-        $sheet->setCellValue("C2", $date_2);
-        $sheet->setCellValue("D2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("E1", $statuses[1]);
-        $sheet->setCellValue("E2", $date_1);
-        $sheet->setCellValue("F2", $date_2);
-        $sheet->setCellValue("G2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("H1", $statuses[2]);
-        $sheet->setCellValue("H2", $date_1);
-        $sheet->setCellValue("I2", $date_2);
-        $sheet->setCellValue("J2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("K1", $statuses[3]);
-        $sheet->setCellValue("K2", $date_1);
-        $sheet->setCellValue("L2", $date_2);
-        $sheet->setCellValue("M2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("N1", $statuses[4]);
-        $sheet->setCellValue("N2", $date_1);
-        $sheet->setCellValue("O2", $date_2);
-        $sheet->setCellValue("P2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("Q1", $statuses[10]);
-        $sheet->setCellValue("Q2", $date_1);
-        $sheet->setCellValue("R2", $date_2);
-        $sheet->setCellValue("S2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("T1", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        $sheet->setCellValue("T2", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
-        $sheet->setCellValue("U2", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
-        $sheet->setCellValue("V2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_PERIOD'));
+        $sheet->setCellValue("A3", JText::sprintf('COM_MKV_HEAD_MANAGER'));
+        $sheet->setCellValue("B2", $statuses[0]);
+        $sheet->setCellValue("B3", $date_1);
+        $sheet->setCellValue("C3", $date_2);
+        $sheet->setCellValue("D3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("E2", $statuses[1]);
+        $sheet->setCellValue("E3", $date_1);
+        $sheet->setCellValue("F3", $date_2);
+        $sheet->setCellValue("G3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("H2", $statuses[2]);
+        $sheet->setCellValue("H3", $date_1);
+        $sheet->setCellValue("I3", $date_2);
+        $sheet->setCellValue("J3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("K2", $statuses[3]);
+        $sheet->setCellValue("K3", $date_1);
+        $sheet->setCellValue("L3", $date_2);
+        $sheet->setCellValue("M3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("N2", $statuses[4]);
+        $sheet->setCellValue("N3", $date_1);
+        $sheet->setCellValue("O3", $date_2);
+        $sheet->setCellValue("P3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("Q2", $statuses[10]);
+        $sheet->setCellValue("Q3", $date_1);
+        $sheet->setCellValue("R3", $date_2);
+        $sheet->setCellValue("S3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("T2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("T3", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
+        $sheet->setCellValue("U3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
+        $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
+        $sheet->setCellValue("W1", JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
+        $sheet->setCellValue("W2", $date_1);
+        $sheet->setCellValue("Z2", $date_2);
+        $sheet->setCellValue("AC2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("W3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("X3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("Y3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
+        $sheet->setCellValue("Z3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AA3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("AB3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
+        $sheet->setCellValue("AC3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AD3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("AE3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
 
         $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'));
 
         //Данные
-        $row = 3; //Строка, с которой начнаются данные
+        $row = 4; //Строка, с которой начнаются данные
         foreach ($items['items'] as $managerID => $item) {
             if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
             $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
@@ -228,6 +257,15 @@ class ReportsModelSentInvites extends ListModel
             $sheet->setCellValue("T{$row}", $item['week']);
             $sheet->setCellValue("U{$row}", $item['today']);
             $sheet->setCellValue("V{$row}", $item['dynamic']);
+            $sheet->setCellValue("W{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("X{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("Y{$row}", $items['payments'][$managerID]['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("Z{$row}", $items['payments'][$managerID]['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("AA{$row}", $items['payments'][$managerID]['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("AB{$row}", $items['payments'][$managerID]['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("AC{$row}", $items['payments'][$managerID]['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("AD{$row}", $items['payments'][$managerID]['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("AE{$row}", $items['payments'][$managerID]['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $row++;
         }
         //Итого
@@ -253,6 +291,15 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("T{$row}", $items['total']['week']);
         $sheet->setCellValue("U{$row}", $items['total']['today']);
         $sheet->setCellValue("V{$row}", $items['total']['dynamic']);
+        $sheet->setCellValue("W{$row}", $items['payments']['total']['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("X{$row}", $items['payments']['total']['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("Y{$row}", $items['payments']['total']['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("Z{$row}", $items['payments']['total']['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("AA{$row}", $items['payments']['total']['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("AB{$row}", $items['payments']['total']['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("AC{$row}", $items['payments']['total']['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("AD{$row}", $items['payments']['total']['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("AE{$row}", $items['payments']['total']['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
 
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
@@ -263,6 +310,57 @@ class ReportsModelSentInvites extends ListModel
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
         $objWriter->save('php://output');
         jexit();
+    }
+
+    private function getPayments(int $project_1, int $project_2)
+    {
+        $prefix = "FinancesModel";
+        JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_finances/models", $prefix);
+        $date_1 = JDate::getInstance($this->state->get('filter.date_1'));
+        $date_2 = JDate::getInstance($this->state->get('filter.date_2'));
+        $diff = JDate::getInstance($this->state->get('filter.date_2'))->diff($date_1);
+        if ((int) $diff->days > 350) {
+            $name = "PaymentsOnDatesByProjects";
+            $params = ['project_1' => $project_1, 'project_2' => $project_2, 'date_1' => $date_1, 'date_2' => $date_2];
+        }
+        else {
+            $name = "PaymentsOnDates";
+            $params = ['projectID' => $project_2, 'date_1' => $date_1, 'date_2' => $date_2];
+        }
+        $model = JModelLegacy::getInstance($name, $prefix, $params);
+        $items = $model->getItems();
+        $total = ['dynamic' => ['rub' => 0, 'usd' => 0, 'eur' => 0], 'week' => ['rub' => 0, 'usd' => 0, 'eur' => 0], 'current' => ['rub' => 0, 'usd' => 0, 'eur' => 0]];
+        if ((int) $diff->days > 350) {
+            foreach (array_keys($items) as $managerID) {
+                foreach (['rub', 'usd', 'eur'] as $currency) {
+                    $total['dynamic'][$currency] += (float) ($items[$managerID][$project_2][$currency] - $items[$managerID][$project_1][$currency]);
+                    $total['week'][$currency] += (float) $items[$managerID][$project_1][$currency];
+                    $total['current'][$currency] += (float) $items[$managerID][$project_2][$currency];
+                    $items[$managerID]['dynamic'][$currency] = number_format((float) ($items[$managerID][$project_2][$currency] - $items[$managerID][$project_1][$currency]), MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                    $items[$managerID]['week'][$currency] = number_format($items[$managerID][$project_1][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                    $items[$managerID]['current'][$currency] = number_format($items[$managerID][$project_2][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                    unset($items[$managerID][$project_1], $items[$managerID][$project_2]);
+                }
+            }
+        }
+        else {
+            foreach (array_keys($items) as $managerID) {
+                foreach (['rub', 'usd', 'eur'] as $currency) {
+                    $total['dynamic'][$currency] += (float) ($items[$managerID]['dynamic'][$currency]);
+                    $total['week'][$currency] += $items[$managerID]['week'][$currency];
+                    $total['current'][$currency] += $items[$managerID]['current'][$currency];
+                    $items[$managerID]['dynamic'][$currency] = number_format((float) ($items[$managerID]['dynamic'][$currency]), MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                    $items[$managerID]['week'][$currency] = number_format($items[$managerID]['week'][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                    $items[$managerID]['current'][$currency] = number_format($items[$managerID]['current'][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+                }
+            }
+        }
+        foreach (['dynamic', 'week', 'current'] as $period) {
+            foreach (['rub', 'usd', 'eur'] as $currency) {
+                $items['total'][$period][$currency] = number_format((float) $total[$period][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
+            }
+        }
+        return $items;
     }
 
     private function loadContractStatuses(): array
