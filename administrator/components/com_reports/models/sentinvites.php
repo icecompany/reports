@@ -166,21 +166,21 @@ class ReportsModelSentInvites extends ListModel
         $date_2 = JDate::getInstance($this->state->get('filter.date_2'))->format("d.m.Y");
 
         $xls = new PHPExcel();
-        $xls->setActiveSheetIndex(0);
+
+        $xls->setActiveSheetIndex();
         $sheet = $xls->getActiveSheet();
 
         $statuses = $this->loadContractStatuses();
 
         //Объединение ячеек
-        $merge = ["B1:V1", "B2:D2", "E2:G2", "H2:J2", "K2:M2", "N2:P2", "Q2:S2", "T2:V2", "W1:AE1", "W2:Y2", "Z2:AB2", "AC2:AE2"];
+        $merge = ["B1:V1", "B2:D2", "E2:G2", "H2:J2", "K2:M2", "N2:P2", "Q2:S2", "T2:V2"];
         foreach ($merge as $cell) $sheet->mergeCells($cell);
         $sheet->getStyle("B1:AE3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $sheet->freezePane("B4");
 
         //Ширина столбцов
         $width = ["A" => 20, "B" => 10, "C" => 10, "D" => 10, "E" => 10, "F" => 10, "G" => 10, "H" => 10, "I" => 10, "J" => 10, "K" => 10, "L" => 10, "M" => 10,
-            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 20, "U" => 20, "V" => 10,
-            "W" => 14, "X" => 11, "Y" => 11, "Z" => 14, "AA" => 11, "AB" => 11, "AC" => 14, "AD" => 11, "AE" => 11];
+            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 20, "U" => 20, "V" => 10];
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
         //Заголовки
         $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_STATUS'));
@@ -214,20 +214,6 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("T3", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
         $sheet->setCellValue("U3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
         $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
-        $sheet->setCellValue("W1", JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
-        $sheet->setCellValue("W2", $date_1);
-        $sheet->setCellValue("Z2", $date_2);
-        $sheet->setCellValue("AC2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("W3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("X3", JText::sprintf('COM_REPORTS_HEAD_USD'));
-        $sheet->setCellValue("Y3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
-        $sheet->setCellValue("Z3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("AA3", JText::sprintf('COM_REPORTS_HEAD_USD'));
-        $sheet->setCellValue("AB3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
-        $sheet->setCellValue("AC3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("AD3", JText::sprintf('COM_REPORTS_HEAD_USD'));
-        $sheet->setCellValue("AE3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
 
         $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'));
 
@@ -257,15 +243,6 @@ class ReportsModelSentInvites extends ListModel
             $sheet->setCellValue("T{$row}", $item['week']);
             $sheet->setCellValue("U{$row}", $item['today']);
             $sheet->setCellValue("V{$row}", $item['dynamic']);
-            $sheet->setCellValue("W{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("X{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("Y{$row}", $items['payments'][$managerID]['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("Z{$row}", $items['payments'][$managerID]['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("AA{$row}", $items['payments'][$managerID]['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("AB{$row}", $items['payments'][$managerID]['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("AC{$row}", $items['payments'][$managerID]['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("AD{$row}", $items['payments'][$managerID]['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-            $sheet->setCellValue("AE{$row}", $items['payments'][$managerID]['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $row++;
         }
         //Итого
@@ -291,15 +268,68 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("T{$row}", $items['total']['week']);
         $sheet->setCellValue("U{$row}", $items['total']['today']);
         $sheet->setCellValue("V{$row}", $items['total']['dynamic']);
-        $sheet->setCellValue("W{$row}", $items['payments']['total']['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("X{$row}", $items['payments']['total']['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("Y{$row}", $items['payments']['total']['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("Z{$row}", $items['payments']['total']['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("AA{$row}", $items['payments']['total']['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("AB{$row}", $items['payments']['total']['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("AC{$row}", $items['payments']['total']['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("AD{$row}", $items['payments']['total']['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
-        $sheet->setCellValue("AE{$row}", $items['payments']['total']['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+
+        //Платежи
+        $xls->createSheet();
+        $xls->setActiveSheetIndex(1);
+        $sheet = $xls->getActiveSheet();
+
+        //Объединение ячеек
+        $merge = ["B1:J1", "B2:D2", "E2:G2", "H2:J2"];
+        foreach ($merge as $cell) $sheet->mergeCells($cell);
+        $sheet->getStyle("B1:J3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->freezePane("B4");
+
+        //Ширина столбцов
+        $width = ["A" => 12, "B" => 14, "C" => 11, "D" => 11, "E" => 14, "F" => 11, "G" => 11, "H" => 14, "I" => 11, "J" => 11];
+
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+        //Заголовки
+        $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_STATUS'));
+        $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_PERIOD'));
+        $sheet->setCellValue("A3", JText::sprintf('COM_MKV_HEAD_MANAGER'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
+        $sheet->setCellValue("B2", $date_1);
+        $sheet->setCellValue("E2", $date_2);
+        $sheet->setCellValue("H2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("B3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("C3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("D3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
+        $sheet->setCellValue("E3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("F3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("G3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
+        $sheet->setCellValue("H3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("I3", JText::sprintf('COM_REPORTS_HEAD_USD'));
+        $sheet->setCellValue("J3", JText::sprintf('COM_REPORTS_HEAD_EUR'));
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_HEAD_PAYMENTS'));
+
+        //Данные
+        $row = 4; //Строка, с которой начнаются данные
+        foreach ($items['items'] as $managerID => $item) {
+            if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
+            $sheet->setCellValue("B{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("C{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("D{$row}", $items['payments'][$managerID]['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("E{$row}", $items['payments'][$managerID]['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("F{$row}", $items['payments'][$managerID]['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("G{$row}", $items['payments'][$managerID]['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("H{$row}", $items['payments'][$managerID]['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("I{$row}", $items['payments'][$managerID]['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $sheet->setCellValue("J{$row}", $items['payments'][$managerID]['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+            $row++;
+        }
+        //Итого
+        $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B{$row}", $items['payments']['total']['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("C{$row}", $items['payments']['total']['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("D{$row}", $items['payments']['total']['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("E{$row}", $items['payments']['total']['current']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("F{$row}", $items['payments']['total']['current']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("G{$row}", $items['payments']['total']['current']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("H{$row}", $items['payments']['total']['dynamic']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("I{$row}", $items['payments']['total']['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
+        $sheet->setCellValue("J{$row}", $items['payments']['total']['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
 
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
