@@ -215,7 +215,7 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("U3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
         $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
 
-        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'));
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_STATUSES_DYNAMIC'));
 
         //Данные
         $row = 4; //Строка, с которой начнаются данные
