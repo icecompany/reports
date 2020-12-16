@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
+	<fieldset name="sent_invites" label="COM_REPORTS_OPTIONS_SENT_INVITES_LABEL" description="COM_REPORTS_OPTIONS_SENT_INVITES_DESC">
+		<field name="exception_users"
+			   type="usergroup"
+			   label="COM_REPORTS_OPTIONS_SENT_INVITES_EXCEPTION_USERS_LABEL"
+			   description="COM_REPORTS_OPTIONS_SENT_INVITES_EXCEPTION_USERS_DESC"
+			   component="com_reports"
+			   section="component"
+		/>
+	</fieldset>
 	<fieldset name="cron" label="COM_REPORTS_OPTIONS_CRON_LABEL" description="COM_REPORTS_OPTIONS_CRON_DESC">
 		<field name="cron_username"
 			   type="text"

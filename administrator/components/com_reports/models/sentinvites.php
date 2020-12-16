@@ -68,6 +68,15 @@ class ReportsModelSentInvites extends ListModel
             }
         }
 
+        //Отсеиваем исключённых пользователей
+        $exception_group = ReportsHelper::getConfig('exception_users');
+        if (!empty($exception_group)) {
+            $not_users = implode(', ', MkvHelper::getGroupUsers($exception_group) ?? []);
+            if (!empty($not_users)) {
+                $query->where("ms.managerID not in ({$not_users})");
+            }
+        }
+
         $search = $this->getState('filter.search');
         if (!empty($search)) {
             $text = $this->_db->q("%{$search}%");

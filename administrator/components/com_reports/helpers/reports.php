@@ -15,7 +15,7 @@ class ReportsHelper
 		HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_WELCOME'), 'index.php?option=com_reports&view=welcome', $vName === 'welcome');
         HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_INVITES'), 'index.php?option=com_reports&view=invites', $vName === 'invites');
         HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_COMPANIES_CONTRACT_STATUSES'), 'index.php?option=com_reports&view=contracts_statuses', $vName === 'contracts_statuses');
-        HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'), 'index.php?option=com_reports&view=sentInvites', $vName === 'sentInvites');
+        HTMLHelper::_('sidebar.addEntry', JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'), 'index.php?option=com_reports&view=sentInvites', $vName == 'sentInvites');
 
         if ($vName !== 'contracts_statuses') {
             PrjHelper::addActiveProjectFilter();
