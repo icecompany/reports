@@ -95,7 +95,7 @@ class ReportsModelSentInvites extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'statuses' => [], 'week' => [], 'dynamic' => [], 'managers' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
+        $result = ['items' => [], 'statuses' => [], 'week' => [], 'dynamic' => [], 'managers' => [], 'invites' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
         $items = parent::getItems();
         foreach ($items as $item) {
             $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
@@ -154,6 +154,7 @@ class ReportsModelSentInvites extends ListModel
         $project = PrjHelper::getActiveProject();
         $previous = PrjHelper::getPreviousProject($project);
         $result['payments'] = $this->getPayments($previous, $project);
+        $result['invites'] = $this->getSentInvites($previous, $project);
 
         foreach ([0, 1, 2, 3, 4, 10] as $status) {
             foreach ($result['managers'] as $managerID => $manager) {
@@ -290,7 +291,7 @@ class ReportsModelSentInvites extends ListModel
         $sheet->freezePane("B4");
 
         //Ширина столбцов
-        $width = ["A" => 12, "B" => 14, "C" => 11, "D" => 11, "E" => 14, "F" => 11, "G" => 11, "H" => 14, "I" => 11, "J" => 11];
+        $width = ["A" => 20, "B" => 14, "C" => 11, "D" => 11, "E" => 14, "F" => 11, "G" => 11, "H" => 14, "I" => 11, "J" => 11];
 
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
         //Заголовки
@@ -316,7 +317,7 @@ class ReportsModelSentInvites extends ListModel
         //Данные
         $row = 4; //Строка, с которой начнаются данные
         foreach ($items['items'] as $managerID => $item) {
-            if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
+            if ((int) $item['current'] === 0 && (int) $item['week'] === 0) continue;
             $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
             $sheet->setCellValue("B{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $sheet->setCellValue("C{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
@@ -341,6 +342,46 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("I{$row}", $items['payments']['total']['dynamic']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
         $sheet->setCellValue("J{$row}", $items['payments']['total']['dynamic']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
 
+        //Отправленные приглашения
+        $xls->createSheet();
+        $xls->setActiveSheetIndex(2);
+        $sheet = $xls->getActiveSheet();
+
+        //Объединение ячеек
+        $merge = ["B1:D1"];
+        foreach ($merge as $cell) $sheet->mergeCells($cell);
+        $sheet->getStyle("A1:D2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->freezePane("B3");
+
+        //Ширина столбцов
+        $width = ["A" => 20, "B" => 11, "C" => 11, "D" => 11];
+
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+        //Заголовки
+        $sheet->setCellValue("A2", JText::sprintf('COM_MKV_HEAD_MANAGER'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_SENT_ITEMS'));
+        $sheet->setCellValue("B2", $date_1);
+        $sheet->setCellValue("C2", $date_2);
+        $sheet->setCellValue("D2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_HEAD_SENT_ITEMS'));
+
+        //Данные
+        $row = 3; //Строка, с которой начнаются данные
+        foreach ($items['invites']['managers'] as $managerID => $item) {
+            if ((int) $item['current'] === 0 && (int) $item['week'] === 0) continue;
+            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
+            $sheet->setCellValue("B{$row}", $items['invites']['managers'][$managerID]['week'] ?? 0);
+            $sheet->setCellValue("C{$row}", $items['invites']['managers'][$managerID]['current'] ?? 0);
+            $sheet->setCellValue("D{$row}", $items['invites']['managers'][$managerID]['dynamic'] ?? 0);
+            $row++;
+        }
+        //Итого
+        $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B{$row}", $items['invites']['total']['week'] ?? 0);
+        $sheet->setCellValue("C{$row}", $items['invites']['total']['current'] ?? 0);
+        $sheet->setCellValue("D{$row}", $items['invites']['total']['dynamic'] ?? 0);
+
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
         header("Cache-Control: no-cache, must-revalidate");
@@ -350,6 +391,52 @@ class ReportsModelSentInvites extends ListModel
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
         $objWriter->save('php://output');
         jexit();
+    }
+
+    private function getSentInvites(int $project_1, int $project_2)
+    {
+        $date_1 = JDate::getInstance($this->state->get('filter.date_1'));
+        $date_2 = JDate::getInstance($this->state->get('filter.date_2'));
+        $diff = JDate::getInstance($this->state->get('filter.date_2'))->diff($date_1);
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true);
+        $query
+            ->select("c.managerID, c.projectID, count(c.id) as cnt")
+            ->from("#__mkv_contract_sent_info si")
+            ->leftJoin("#__mkv_contracts c on c.id = si.contractID");
+        if ((int) $diff->days > 350) {
+            $query
+                ->where("(c.projectID = {$project_1} and si.invite_date <= {$db->q($date_1)}) or (c.projectID = {$db->q($project_2)} and si.invite_date <= {$db->q($date_2)})")
+                ->group("c.managerID, c.projectID");
+        }
+        else {
+            $query
+                ->select("if(si.invite_date <= {$db->q($date_1)}, 'week' , 'dynamic') as {$db->qn('period')}")
+                ->where("c.projectID = {$project_2} and si.invite_date <= {$db->q($date_2)}")
+                ->group("c.managerID, c.projectID, period");
+        }
+
+        $items = $db->setQuery($query)->loadAssocList();
+        $result = ['total' => ['week' => 0, 'current' => 0, 'dynamic' => 0], 'managers' => []];
+        if ((int) $diff->days > 350) {
+            foreach ($items as $item) {
+                $period = ((int) $item['projectID'] !== (int) $project_1) ? 'current' : 'week';
+                $result['managers'][$item['managerID']][$period] = (int) ($item['cnt'] ?? 0);
+                $result['total'][$period] += (int) ($item['cnt'] ?? 0);
+            }
+        }
+        else {
+            foreach ($items as $item) {
+                $result['managers'][$item['managerID']][$item['period']] = (int) ($item['cnt'] ?? 0);
+                $result['managers'][$item['managerID']]['current'] = $result['managers'][$item['managerID']]['week'] + $result['managers'][$item['managerID']]['dynamic'];
+            }
+        }
+        foreach ($result['managers'] as $managerID => $invites) {
+            $result['managers'][$managerID]['dynamic'] = (int) ($result['managers'][$managerID]['current'] - $result['managers'][$managerID]['week']);
+            foreach (['dynamic', 'current', 'week'] as $period) $result['total'][$period] += $result['managers'][$managerID][$period];
+        }
+
+        return $result;
     }
 
     private function getPayments(int $project_1, int $project_2)
