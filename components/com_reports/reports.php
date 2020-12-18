@@ -16,6 +16,7 @@ JFactory::getLanguage()->load('com_reports', JPATH_ADMINISTRATOR . "/components/
 JFactory::getLanguage()->load('com_mkv', JPATH_ADMINISTRATOR . "/components/com_mkv", 'ru-RU', true);
 JFactory::getLanguage()->load('com_companies', JPATH_ADMINISTRATOR . "/components/com_companies", 'ru-RU', true);
 JFactory::getLanguage()->load('com_contracts', JPATH_ADMINISTRATOR . "/components/com_contracts", 'ru-RU', true);
+JFactory::getLanguage()->load('com_prices', JPATH_ADMINISTRATOR . "/components/com_prices", 'ru-RU', true);
 require_once JPATH_ADMINISTRATOR . "/components/com_prj/helpers/prj.php";
 require_once JPATH_ADMINISTRATOR . "/components/com_scheduler/helpers/scheduler.php";
 require_once JPATH_ADMINISTRATOR . "/components/com_mkv/helpers/mkv.php";

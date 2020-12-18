@@ -95,7 +95,7 @@ class ReportsModelSentInvites extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'statuses' => [], 'week' => [], 'dynamic' => [], 'managers' => [], 'invites' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
+        $result = ['items' => [], 'statuses' => [], 'week' => [], 'squares' => [], 'dynamic' => [], 'managers' => [], 'invites' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
         $items = parent::getItems();
         foreach ($items as $item) {
             $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
@@ -155,6 +155,7 @@ class ReportsModelSentInvites extends ListModel
         $previous = PrjHelper::getPreviousProject($project);
         $result['payments'] = $this->getPayments($previous, $project);
         $result['invites'] = $this->getSentInvites($previous, $project);
+        $result['squares'] = $this->getSquares($previous, $project);
 
         foreach ([0, 1, 2, 3, 4, 10] as $status) {
             foreach ($result['managers'] as $managerID => $manager) {
@@ -177,6 +178,7 @@ class ReportsModelSentInvites extends ListModel
 
         $xls = new PHPExcel();
 
+        //Статусы
         $xls->setActiveSheetIndex();
         $sheet = $xls->getActiveSheet();
 
@@ -382,6 +384,303 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("C{$row}", $items['invites']['total']['current'] ?? 0);
         $sheet->setCellValue("D{$row}", $items['invites']['total']['dynamic'] ?? 0);
 
+        //Площади
+        $xls->createSheet();
+        $xls->setActiveSheetIndex(3);
+        $sheet = $xls->getActiveSheet();
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_HEAD_SQUARES'));
+        $sheet->getPageSetup()->setFitToHeight(0);
+        $sheet->getPageSetup()->setFitToHeight(1);
+
+        //Объединение ячеек
+        $merge = [
+            "B1:G1", "H1:M1", "N1:S1", "T1:Y1", "Z1:AE1", "AF1:AK1", "AL1:AQ1", "AR1:AW1", "AX1:BC1", "BD1:BI1",
+            "B2:C2", "D2:E2", "F2:G2", //Итого
+            "H2:I2", "J2:K2", "L2:M2", //Экспоместо
+            "N2:O2", "P2:Q2", "R2:S2", //Премиум
+            "T2:U2", "V2:W2", "X2:Y2", //Улица демонстрация
+            "Z2:AA2", "AB2:AC2", "AD2:AE2", //Улица застройка
+            "AF2:AG2", "AH2:AI2", "AJ2:AK2", //ВПК
+            "AL2:AM2", "AN2:AO2", "AP2:AQ2", //ВПК улица
+            "AR2:AS2", "AT2:AU2", "AV2:AW2", //Второй премиум
+            "AX2:AY2", "AZ2:BA2", "BB2:BC2", //Второй
+            "BD2:BE2", "BF2:BG2", "BH2:BI2" //НПФ ОРТ
+        ];
+        foreach ($merge as $cell) $sheet->mergeCells($cell);
+        $sheet->freezePane("B4");
+
+        //Ширина столбцов
+        $width = ["A" => 20, "B" => 13, "C" => 9, "D" => 13, "E" => 9, "F" => 13, "G" => 9, "H" => 13, "I" => 9, "J" => 13, "K" => 9, "L" => 13, "M" => 9,
+            "N" => 13, "O" => 9, "P" => 13, "Q" => 9, "R" => 13, "S" => 9, "T" => 13, "U" => 9, "V" => 13, "W" => 9, "X" => 13, "Y" => 9,
+            "Z" => 13, "AA" => 9, "AB" => 13, "AC" => 9, "AD" => 13, "AE" => 9, "AF" => 13, "AG" => 9, "AH" => 13, "AI" => 9, "AJ" => 13, "AK" => 9,
+            "AL" => 13, "AM" => 9, "AN" => 13, "AO" => 9, "AP" => 13, "AQ" => 9, "AR" => 13, "AS" => 9, "AT" => 13, "AU" => 9, "AV" => 13, "AW" => 9, "AX" => 13,
+            "AY" => 9, "AZ" => 13, "BA" => 9, "BB" => 13, "BC" => 9, "BD" => 13, "BE" => 9, "BF" => 13, "BG" => 9, "BH" => 13, "BI" => 9];
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+        $sheet->getStyle("B1:BI3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+
+        //Заголовки
+        $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_SQUARE'));
+        $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_PERIOD'));
+        $sheet->setCellValue("A3", JText::sprintf('COM_MKV_HEAD_MANAGER'));
+        //Итого
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B2", $date_1);
+        $sheet->setCellValue("D2", $date_2);
+        $sheet->setCellValue("F2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("B3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("C3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("D3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("E3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("F3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("G3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Экспоместо
+        $sheet->setCellValue("H1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_1'));
+        $sheet->setCellValue("H2", $date_1);
+        $sheet->setCellValue("J2", $date_2);
+        $sheet->setCellValue("L2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("H3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("I3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("J3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("K3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("L3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("M3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Премиум
+        $sheet->setCellValue("N1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_2'));
+        $sheet->setCellValue("N2", $date_1);
+        $sheet->setCellValue("P2", $date_2);
+        $sheet->setCellValue("R2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("N3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("O3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("P3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("Q3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("R3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("S3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Улица демонстрация
+        $sheet->setCellValue("T1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_3'));
+        $sheet->setCellValue("T2", $date_1);
+        $sheet->setCellValue("V2", $date_2);
+        $sheet->setCellValue("X2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("T3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("U3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("W3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("X3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("Y3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Улица застройка
+        $sheet->setCellValue("Z1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_4'));
+        $sheet->setCellValue("Z2", $date_1);
+        $sheet->setCellValue("AB2", $date_2);
+        $sheet->setCellValue("AD2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("Z3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AA3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AB3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AC3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AD3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AE3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //ВПК
+        $sheet->setCellValue("AF1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_5'));
+        $sheet->setCellValue("AF2", $date_1);
+        $sheet->setCellValue("AH2", $date_2);
+        $sheet->setCellValue("AJ2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("AF3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AG3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AH3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AI3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AJ3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AK3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //ВПК улица
+        $sheet->setCellValue("AL1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_6'));
+        $sheet->setCellValue("AL2", $date_1);
+        $sheet->setCellValue("AN2", $date_2);
+        $sheet->setCellValue("AP2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("AL3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AM3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AN3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AO3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AP3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AQ3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Второй премиум
+        $sheet->setCellValue("AR1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_7'));
+        $sheet->setCellValue("AR2", $date_1);
+        $sheet->setCellValue("AT2", $date_2);
+        $sheet->setCellValue("AV2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("AR3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AS3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AT3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AU3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AV3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AW3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //Второй
+        $sheet->setCellValue("AX1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_8'));
+        $sheet->setCellValue("AX2", $date_1);
+        $sheet->setCellValue("AZ2", $date_2);
+        $sheet->setCellValue("BB2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("AX3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("AY3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("AZ3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("BA3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("BB3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("BC3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        //НПФ ОРТ
+        $sheet->setCellValue("BD1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_9'));
+        $sheet->setCellValue("BD2", $date_1);
+        $sheet->setCellValue("BF2", $date_2);
+        $sheet->setCellValue("BH2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        $sheet->setCellValue("BD3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("BE3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("BF3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("BG3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+        $sheet->setCellValue("BH3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
+        $sheet->setCellValue("BI3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
+
+        //Данные
+        $row = 4; //Строка, с которой начнаются данные
+        foreach ($items['squares']['managers'] as $managerID => $item) {
+            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
+            //Итого
+            $sheet->setCellValue("B{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['amount']);
+            $sheet->setCellValue("C{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['square']);
+            $sheet->setCellValue("D{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['amount']);
+            $sheet->setCellValue("E{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['square']);
+            $sheet->setCellValue("F{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['amount']);
+            $sheet->setCellValue("G{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['square']);
+            //Экспоместо
+            $sheet->setCellValue("H{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['amount']);
+            $sheet->setCellValue("I{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['square']);
+            $sheet->setCellValue("J{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['amount']);
+            $sheet->setCellValue("K{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['square']);
+            $sheet->setCellValue("L{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['amount']);
+            $sheet->setCellValue("M{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['square']);
+            //Премиум
+            $sheet->setCellValue("N{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['amount']);
+            $sheet->setCellValue("O{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['square']);
+            $sheet->setCellValue("P{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['amount']);
+            $sheet->setCellValue("Q{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['square']);
+            $sheet->setCellValue("R{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['amount']);
+            $sheet->setCellValue("S{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['square']);
+            //Улица демонстрация
+            $sheet->setCellValue("T{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['amount']);
+            $sheet->setCellValue("U{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['square']);
+            $sheet->setCellValue("V{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['amount']);
+            $sheet->setCellValue("W{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['square']);
+            $sheet->setCellValue("X{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['amount']);
+            $sheet->setCellValue("Y{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['square']);
+            //Улица застройка
+            $sheet->setCellValue("Z{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['amount']);
+            $sheet->setCellValue("AA{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['square']);
+            $sheet->setCellValue("AB{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['amount']);
+            $sheet->setCellValue("AC{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['square']);
+            $sheet->setCellValue("AD{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['amount']);
+            $sheet->setCellValue("AE{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['square']);
+            //ВПК
+            $sheet->setCellValue("AF{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['amount']);
+            $sheet->setCellValue("AG{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['square']);
+            $sheet->setCellValue("AH{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['amount']);
+            $sheet->setCellValue("AI{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['square']);
+            $sheet->setCellValue("AJ{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['amount']);
+            $sheet->setCellValue("AK{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['square']);
+            //ВПК улица
+            $sheet->setCellValue("AL{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['amount']);
+            $sheet->setCellValue("AM{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['square']);
+            $sheet->setCellValue("AN{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['amount']);
+            $sheet->setCellValue("AO{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['square']);
+            $sheet->setCellValue("AP{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['amount']);
+            $sheet->setCellValue("AQ{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['square']);
+            //Второй премиум
+            $sheet->setCellValue("AR{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['amount']);
+            $sheet->setCellValue("AS{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['square']);
+            $sheet->setCellValue("AT{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['amount']);
+            $sheet->setCellValue("AU{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['square']);
+            $sheet->setCellValue("AV{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['amount']);
+            $sheet->setCellValue("AW{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['square']);
+            //Второй премиум
+            $sheet->setCellValue("AX{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['amount']);
+            $sheet->setCellValue("AY{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['square']);
+            $sheet->setCellValue("AZ{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['amount']);
+            $sheet->setCellValue("BA{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['square']);
+            $sheet->setCellValue("BB{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['amount']);
+            $sheet->setCellValue("BC{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['square']);
+            //НПФ ОРТ
+            $sheet->setCellValue("BD{$row}", $items['squares']['managers'][$managerID]['week'][9]['rub']['amount']);
+            $sheet->setCellValue("BE{$row}", $items['squares']['managers'][$managerID]['week'][9]['rub']['square']);
+            $sheet->setCellValue("BF{$row}", $items['squares']['managers'][$managerID]['current'][9]['rub']['amount']);
+            $sheet->setCellValue("BJ{$row}", $items['squares']['managers'][$managerID]['current'][9]['rub']['square']);
+            $sheet->setCellValue("BH{$row}", $items['squares']['managers'][$managerID]['dynamic'][9]['rub']['amount']);
+            $sheet->setCellValue("BI{$row}", $items['squares']['managers'][$managerID]['dynamic'][9]['rub']['square']);
+            $row++;
+        }
+        //Итого
+        $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B{$row}", $items['squares']['total_by_period']['rub']['week']['amount']);
+        $sheet->setCellValue("C{$row}", $items['squares']['total_by_period']['rub']['week']['square']);
+        $sheet->setCellValue("D{$row}", $items['squares']['total_by_period']['rub']['current']['amount']);
+        $sheet->setCellValue("E{$row}", $items['squares']['total_by_period']['rub']['current']['square']);
+        $sheet->setCellValue("F{$row}", $items['squares']['total_by_period']['rub']['dynamic']['amount']);
+        $sheet->setCellValue("G{$row}", $items['squares']['total_by_period']['rub']['dynamic']['square']);
+
+        $sheet->setCellValue("H{$row}", $items['squares']['total']['rub'][1]['week']['amount']);
+        $sheet->setCellValue("I{$row}", $items['squares']['total']['rub'][1]['week']['square']);
+        $sheet->setCellValue("J{$row}", $items['squares']['total']['rub'][1]['current']['amount']);
+        $sheet->setCellValue("K{$row}", $items['squares']['total']['rub'][1]['current']['square']);
+        $sheet->setCellValue("L{$row}", $items['squares']['total']['rub'][1]['dynamic']['amount']);
+        $sheet->setCellValue("M{$row}", $items['squares']['total']['rub'][1]['dynamic']['square']);
+
+        $sheet->setCellValue("N{$row}", $items['squares']['total']['rub'][2]['week']['amount']);
+        $sheet->setCellValue("O{$row}", $items['squares']['total']['rub'][2]['week']['square']);
+        $sheet->setCellValue("P{$row}", $items['squares']['total']['rub'][2]['current']['amount']);
+        $sheet->setCellValue("Q{$row}", $items['squares']['total']['rub'][2]['current']['square']);
+        $sheet->setCellValue("R{$row}", $items['squares']['total']['rub'][2]['dynamic']['amount']);
+        $sheet->setCellValue("S{$row}", $items['squares']['total']['rub'][2]['dynamic']['square']);
+
+        $sheet->setCellValue("T{$row}", $items['squares']['total']['rub'][3]['week']['amount']);
+        $sheet->setCellValue("U{$row}", $items['squares']['total']['rub'][3]['week']['square']);
+        $sheet->setCellValue("V{$row}", $items['squares']['total']['rub'][3]['current']['amount']);
+        $sheet->setCellValue("W{$row}", $items['squares']['total']['rub'][3]['current']['square']);
+        $sheet->setCellValue("X{$row}", $items['squares']['total']['rub'][3]['dynamic']['amount']);
+        $sheet->setCellValue("Y{$row}", $items['squares']['total']['rub'][3]['dynamic']['square']);
+
+        $sheet->setCellValue("Z{$row}", $items['squares']['total']['rub'][4]['week']['amount']);
+        $sheet->setCellValue("AA{$row}", $items['squares']['total']['rub'][4]['week']['square']);
+        $sheet->setCellValue("AB{$row}", $items['squares']['total']['rub'][4]['current']['amount']);
+        $sheet->setCellValue("AC{$row}", $items['squares']['total']['rub'][4]['current']['square']);
+        $sheet->setCellValue("AD{$row}", $items['squares']['total']['rub'][4]['dynamic']['amount']);
+        $sheet->setCellValue("AE{$row}", $items['squares']['total']['rub'][4]['dynamic']['square']);
+
+        $sheet->setCellValue("AF{$row}", $items['squares']['total']['rub'][5]['week']['amount']);
+        $sheet->setCellValue("AG{$row}", $items['squares']['total']['rub'][5]['week']['square']);
+        $sheet->setCellValue("AH{$row}", $items['squares']['total']['rub'][5]['current']['amount']);
+        $sheet->setCellValue("AI{$row}", $items['squares']['total']['rub'][5]['current']['square']);
+        $sheet->setCellValue("AJ{$row}", $items['squares']['total']['rub'][5]['dynamic']['amount']);
+        $sheet->setCellValue("AK{$row}", $items['squares']['total']['rub'][5]['dynamic']['square']);
+
+        $sheet->setCellValue("AL{$row}", $items['squares']['total']['rub'][6]['week']['amount']);
+        $sheet->setCellValue("AM{$row}", $items['squares']['total']['rub'][6]['week']['square']);
+        $sheet->setCellValue("AN{$row}", $items['squares']['total']['rub'][6]['current']['amount']);
+        $sheet->setCellValue("AO{$row}", $items['squares']['total']['rub'][6]['current']['square']);
+        $sheet->setCellValue("AP{$row}", $items['squares']['total']['rub'][6]['dynamic']['amount']);
+        $sheet->setCellValue("AQ{$row}", $items['squares']['total']['rub'][6]['dynamic']['square']);
+
+        $sheet->setCellValue("AR{$row}", $items['squares']['total']['rub'][7]['week']['amount']);
+        $sheet->setCellValue("AS{$row}", $items['squares']['total']['rub'][7]['week']['square']);
+        $sheet->setCellValue("AT{$row}", $items['squares']['total']['rub'][7]['current']['amount']);
+        $sheet->setCellValue("AU{$row}", $items['squares']['total']['rub'][7]['current']['square']);
+        $sheet->setCellValue("AV{$row}", $items['squares']['total']['rub'][7]['dynamic']['amount']);
+        $sheet->setCellValue("AW{$row}", $items['squares']['total']['rub'][7]['dynamic']['square']);
+
+        $sheet->setCellValue("AX{$row}", $items['squares']['total']['rub'][8]['week']['amount']);
+        $sheet->setCellValue("AY{$row}", $items['squares']['total']['rub'][8]['week']['square']);
+        $sheet->setCellValue("AZ{$row}", $items['squares']['total']['rub'][8]['current']['amount']);
+        $sheet->setCellValue("BA{$row}", $items['squares']['total']['rub'][8]['current']['square']);
+        $sheet->setCellValue("BB{$row}", $items['squares']['total']['rub'][8]['dynamic']['amount']);
+        $sheet->setCellValue("BC{$row}", $items['squares']['total']['rub'][8]['dynamic']['square']);
+
+        $sheet->setCellValue("BD{$row}", $items['squares']['total']['rub'][9]['week']['amount']);
+        $sheet->setCellValue("BE{$row}", $items['squares']['total']['rub'][9]['week']['square']);
+        $sheet->setCellValue("BF{$row}", $items['squares']['total']['rub'][9]['current']['amount']);
+        $sheet->setCellValue("BG{$row}", $items['squares']['total']['rub'][9]['current']['square']);
+        $sheet->setCellValue("BH{$row}", $items['squares']['total']['rub'][9]['dynamic']['amount']);
+        $sheet->setCellValue("BI{$row}", $items['squares']['total']['rub'][9]['dynamic']['square']);
+
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
         header("Cache-Control: no-cache, must-revalidate");
@@ -392,6 +691,26 @@ class ReportsModelSentInvites extends ListModel
         $objWriter->save('php://output');
         jexit();
     }
+
+    private function getSquares(int $project_1, int $project_2)
+    {
+        $prefix = "ReportsModel";
+        $date_1 = JDate::getInstance($this->state->get('filter.date_1'));
+        $date_2 = JDate::getInstance($this->state->get('filter.date_2'));
+        $diff = JDate::getInstance($this->state->get('filter.date_2'))->diff($date_1);
+        if ((int) $diff->days > 350) {
+            $name = "SquaresByProjects";
+            $params = ['project_1' => $project_1, 'project_2' => $project_2, 'date_1' => $date_1, 'date_2' => $date_2];
+        }
+        else {
+            $name = "SquaresByDates";
+            $params = ['projectID' => $project_2, 'date_1' => $date_1, 'date_2' => $date_2];
+        }
+        $model = JModelLegacy::getInstance($name, $prefix, $params);
+        $items = $model->getItems();
+        return $items ?? [];
+    }
+
 
     private function getSentInvites(int $project_1, int $project_2)
     {
