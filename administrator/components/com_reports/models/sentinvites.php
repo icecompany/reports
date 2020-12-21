@@ -98,6 +98,7 @@ class ReportsModelSentInvites extends ListModel
         $result = ['items' => [], 'statuses' => [], 'week' => [], 'squares' => [], 'dynamic' => [], 'managers' => [], 'invites' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
         $items = parent::getItems();
         foreach ($items as $item) {
+            $is1 = "status_-1";
             $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
 
             if (!isset($result['managers'][$item->managerID])) $result['managers'][$item->managerID] = MkvHelper::getLastAndFirstNames($item->manager);
@@ -106,43 +107,67 @@ class ReportsModelSentInvites extends ListModel
             $result['items'][$item->managerID][$day] = $item->invites;
             $result['total'][$day] += $item->invites;
             if ($day !== 'today') {
+                $result['week'][$item->managerID][-1] = (int) $item->$is1;
                 $result['week'][$item->managerID][0] = (int) $item->status_0;
                 $result['week'][$item->managerID][1] = (int) $item->status_1;
                 $result['week'][$item->managerID][2] = (int) $item->status_2;
                 $result['week'][$item->managerID][3] = (int) $item->status_3;
                 $result['week'][$item->managerID][4] = (int) $item->status_4;
+                $result['week'][$item->managerID][5] = (int) $item->status_5;
+                $result['week'][$item->managerID][6] = (int) $item->status_6;
+                $result['week'][$item->managerID][9] = (int) $item->status_9;
                 $result['week'][$item->managerID][10] = (int) $item->status_10;
+                if (!isset($result['total']['statuses_week'][-1])) $result['total']['statuses_week'][-1] = 0;
                 if (!isset($result['total']['statuses_week'][0])) $result['total']['statuses_week'][0] = 0;
                 if (!isset($result['total']['statuses_week'][1])) $result['total']['statuses_week'][1] = 0;
                 if (!isset($result['total']['statuses_week'][2])) $result['total']['statuses_week'][2] = 0;
                 if (!isset($result['total']['statuses_week'][3])) $result['total']['statuses_week'][3] = 0;
                 if (!isset($result['total']['statuses_week'][4])) $result['total']['statuses_week'][4] = 0;
+                if (!isset($result['total']['statuses_week'][5])) $result['total']['statuses_week'][5] = 0;
+                if (!isset($result['total']['statuses_week'][6])) $result['total']['statuses_week'][6] = 0;
+                if (!isset($result['total']['statuses_week'][9])) $result['total']['statuses_week'][9] = 0;
                 if (!isset($result['total']['statuses_week'][10])) $result['total']['statuses_week'][10] = 0;
+                $result['total']['statuses_week'][-1] += (int) $item->$is1;
                 $result['total']['statuses_week'][0] += (int) $item->status_0;
                 $result['total']['statuses_week'][1] += (int) $item->status_1;
                 $result['total']['statuses_week'][2] += (int) $item->status_2;
                 $result['total']['statuses_week'][3] += (int) $item->status_3;
                 $result['total']['statuses_week'][4] += (int) $item->status_4;
+                $result['total']['statuses_week'][5] += (int) $item->status_5;
+                $result['total']['statuses_week'][6] += (int) $item->status_6;
+                $result['total']['statuses_week'][9] += (int) $item->status_9;
                 $result['total']['statuses_week'][10] += (int) $item->status_10;
             }
             else {
+                $result['statuses'][$item->managerID][-1] = (int) $item->$is1 ?? 0;
                 $result['statuses'][$item->managerID][0] = (int) $item->status_0 ?? 0;
                 $result['statuses'][$item->managerID][1] = (int) $item->status_1 ?? 0;
                 $result['statuses'][$item->managerID][2] = (int) $item->status_2 ?? 0;
                 $result['statuses'][$item->managerID][3] = (int) $item->status_3 ?? 0;
                 $result['statuses'][$item->managerID][4] = (int) $item->status_4 ?? 0;
+                $result['statuses'][$item->managerID][5] = (int) $item->status_5 ?? 0;
+                $result['statuses'][$item->managerID][6] = (int) $item->status_6 ?? 0;
+                $result['statuses'][$item->managerID][9] = (int) $item->status_9 ?? 0;
                 $result['statuses'][$item->managerID][10] = (int) $item->status_10 ?? 0;
+                if (!isset($result['total']['statuses'][-1])) $result['total']['statuses'][-1] = 0;
                 if (!isset($result['total']['statuses'][0])) $result['total']['statuses'][0] = 0;
                 if (!isset($result['total']['statuses'][1])) $result['total']['statuses'][1] = 0;
                 if (!isset($result['total']['statuses'][2])) $result['total']['statuses'][2] = 0;
                 if (!isset($result['total']['statuses'][3])) $result['total']['statuses'][3] = 0;
                 if (!isset($result['total']['statuses'][4])) $result['total']['statuses'][4] = 0;
+                if (!isset($result['total']['statuses'][5])) $result['total']['statuses'][5] = 0;
+                if (!isset($result['total']['statuses'][6])) $result['total']['statuses'][6] = 0;
+                if (!isset($result['total']['statuses'][9])) $result['total']['statuses'][9] = 0;
                 if (!isset($result['total']['statuses'][10])) $result['total']['statuses'][10] = 0;
+                $result['total']['statuses'][-1] += (int) $item->$is1;
                 $result['total']['statuses'][0] += (int) $item->status_0;
                 $result['total']['statuses'][1] += (int) $item->status_1;
                 $result['total']['statuses'][2] += (int) $item->status_2;
                 $result['total']['statuses'][3] += (int) $item->status_3;
                 $result['total']['statuses'][4] += (int) $item->status_4;
+                $result['total']['statuses'][5] += (int) $item->status_5;
+                $result['total']['statuses'][6] += (int) $item->status_6;
+                $result['total']['statuses'][9] += (int) $item->status_9;
                 $result['total']['statuses'][10] += (int) $item->status_10;
             }
             if (isset($result['items'][$item->managerID]['today']) && isset($result['items'][$item->managerID]['week'])) {
@@ -157,7 +182,7 @@ class ReportsModelSentInvites extends ListModel
         $result['invites'] = $this->getSentInvites($previous, $project);
         $result['squares'] = $this->getSquares($previous, $project);
 
-        foreach ([0, 1, 2, 3, 4, 10] as $status) {
+        foreach ([-1, 0, 1, 2, 3, 4, 5, 6, 9, 10] as $status) {
             foreach ($result['managers'] as $managerID => $manager) {
                 $result['dynamic'][$managerID][$status] = $result['statuses'][$managerID][$status] - $result['week'][$managerID][$status];
             }
@@ -185,47 +210,77 @@ class ReportsModelSentInvites extends ListModel
         $statuses = $this->loadContractStatuses();
 
         //Объединение ячеек
-        $merge = ["B1:V1", "B2:D2", "E2:G2", "H2:J2", "K2:M2", "N2:P2", "Q2:S2", "T2:V2"];
+        $merge = ["B1:AH1",
+            "B2:D2", "E2:G2", "H2:J2", "K2:M2", "N2:P2", "Q2:S2", "T2:V2", "W2:Y2", "Z2:AB2", "AC2:AE2", "AF2:AH2"];
         foreach ($merge as $cell) $sheet->mergeCells($cell);
-        $sheet->getStyle("B1:AE3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("B1:AH3")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
         $sheet->freezePane("B4");
 
         //Ширина столбцов
-        $width = ["A" => 20, "B" => 10, "C" => 10, "D" => 10, "E" => 10, "F" => 10, "G" => 10, "H" => 10, "I" => 10, "J" => 10, "K" => 10, "L" => 10, "M" => 10,
-            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 20, "U" => 20, "V" => 10];
+        $width = ["A" => 20, "B" => 20, "C" => 20, "D" => 10, "E" => 10, "F" => 10, "G" => 10, "H" => 10, "I" => 10, "J" => 10, "K" => 10, "L" => 10, "M" => 10,
+            "N" => 10, "O" => 10, "P" => 10, "Q" => 10, "R" => 10, "S" => 10, "T" => 10, "U" => 10, "V" => 10, "W" => 10, "X" => 10, "Y" => 10,
+            "Z" => 10, "AA" => 10, "AB" => 10, "AC" => 10, "AD" => 10, "AE" => 10, "AF" => 10, "AG" => 10, "AH" => 10];
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
         //Заголовки
         $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_STATUS'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_MENU_STATUSES_DYNAMIC'));
         $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_PERIOD'));
         $sheet->setCellValue("A3", JText::sprintf('COM_MKV_HEAD_MANAGER'));
-        $sheet->setCellValue("B2", $statuses[0]);
-        $sheet->setCellValue("B3", $date_1);
-        $sheet->setCellValue("C3", $date_2);
+        //Итого
+        $sheet->setCellValue("B2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B3", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
+        $sheet->setCellValue("C3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
         $sheet->setCellValue("D3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("E2", $statuses[1]);
+        //В проекте
+        $sheet->setCellValue("E2", JText::sprintf('COM_MKV_STATUS_IN_PROJECT'));
         $sheet->setCellValue("E3", $date_1);
         $sheet->setCellValue("F3", $date_2);
         $sheet->setCellValue("G3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("H2", $statuses[2]);
+        //Отказ
+        $sheet->setCellValue("H2", $statuses[0]);
         $sheet->setCellValue("H3", $date_1);
         $sheet->setCellValue("I3", $date_2);
         $sheet->setCellValue("J3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("K2", $statuses[3]);
+        //Договор
+        $sheet->setCellValue("K2", $statuses[1]);
         $sheet->setCellValue("K3", $date_1);
         $sheet->setCellValue("L3", $date_2);
         $sheet->setCellValue("M3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("N2", $statuses[4]);
+        //Приглашение
+        $sheet->setCellValue("N2", $statuses[2]);
         $sheet->setCellValue("N3", $date_1);
         $sheet->setCellValue("O3", $date_2);
         $sheet->setCellValue("P3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("Q2", $statuses[10]);
+        //Планируют
+        $sheet->setCellValue("Q2", $statuses[3]);
         $sheet->setCellValue("Q3", $date_1);
         $sheet->setCellValue("R3", $date_2);
         $sheet->setCellValue("S3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("T2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        $sheet->setCellValue("T3", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
-        $sheet->setCellValue("U3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
+        //Заявка
+        $sheet->setCellValue("T2", $statuses[4]);
+        $sheet->setCellValue("T3", $date_1);
+        $sheet->setCellValue("U3", $date_2);
         $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        //Соэкспонент
+        $sheet->setCellValue("W2", $statuses[5]);
+        $sheet->setCellValue("W3", $date_1);
+        $sheet->setCellValue("X3", $date_2);
+        $sheet->setCellValue("Y3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        //Соэкспонент без оплаты
+        $sheet->setCellValue("Z2", $statuses[6]);
+        $sheet->setCellValue("Z3", $date_1);
+        $sheet->setCellValue("AA3", $date_2);
+        $sheet->setCellValue("AB3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        //Некоммерческий
+        $sheet->setCellValue("AC2", $statuses[9]);
+        $sheet->setCellValue("AC3", $date_1);
+        $sheet->setCellValue("AD3", $date_2);
+        $sheet->setCellValue("AE3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+        //Счёт
+        $sheet->setCellValue("AF2", $statuses[10]);
+        $sheet->setCellValue("AF3", $date_1);
+        $sheet->setCellValue("AG3", $date_2);
+        $sheet->setCellValue("AH3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
 
         $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_STATUSES_DYNAMIC'));
 
@@ -234,52 +289,100 @@ class ReportsModelSentInvites extends ListModel
         foreach ($items['items'] as $managerID => $item) {
             if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
             $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
-            $sheet->setCellValue("B{$row}", $items['week'][$managerID][0]);
-            $sheet->setCellValue("C{$row}", $items['statuses'][$managerID][0]);
-            $sheet->setCellValue("D{$row}", $items['dynamic'][$managerID][0]);
-            $sheet->setCellValue("E{$row}", $items['week'][$managerID][1]);
-            $sheet->setCellValue("F{$row}", $items['statuses'][$managerID][1]);
-            $sheet->setCellValue("G{$row}", $items['dynamic'][$managerID][1]);
-            $sheet->setCellValue("H{$row}", $items['week'][$managerID][2]);
-            $sheet->setCellValue("I{$row}", $items['statuses'][$managerID][2]);
-            $sheet->setCellValue("J{$row}", $items['dynamic'][$managerID][2]);
-            $sheet->setCellValue("K{$row}", $items['week'][$managerID][3]);
-            $sheet->setCellValue("L{$row}", $items['statuses'][$managerID][3]);
-            $sheet->setCellValue("M{$row}", $items['dynamic'][$managerID][3]);
-            $sheet->setCellValue("N{$row}", $items['week'][$managerID][4]);
-            $sheet->setCellValue("O{$row}", $items['statuses'][$managerID][4]);
-            $sheet->setCellValue("P{$row}", $items['dynamic'][$managerID][4]);
-            $sheet->setCellValue("Q{$row}", $items['week'][$managerID][10]);
-            $sheet->setCellValue("R{$row}", $items['statuses'][$managerID][10]);
-            $sheet->setCellValue("S{$row}", $items['dynamic'][$managerID][10]);
-            $sheet->setCellValue("T{$row}", $item['week']);
-            $sheet->setCellValue("U{$row}", $item['today']);
-            $sheet->setCellValue("V{$row}", $item['dynamic']);
+            //Итого
+            $sheet->setCellValue("B{$row}", $item['week'] ?? 0);
+            $sheet->setCellValue("C{$row}", $item['today'] ?? 0);
+            $sheet->setCellValue("D{$row}", $item['dynamic'] ?? 0);
+            //В проекте
+            $sheet->setCellValue("E{$row}", $items['week'][$managerID][-1] ?? 0);
+            $sheet->setCellValue("F{$row}", $items['statuses'][$managerID][-1] ?? 0);
+            $sheet->setCellValue("G{$row}", $items['dynamic'][$managerID][-1] ?? 0);
+            //Отказ
+            $sheet->setCellValue("H{$row}", $items['week'][$managerID][0] ?? 0);
+            $sheet->setCellValue("I{$row}", $items['statuses'][$managerID][0] ?? 0);
+            $sheet->setCellValue("J{$row}", $items['dynamic'][$managerID][0] ?? 0);
+            //Договор
+            $sheet->setCellValue("K{$row}", $items['week'][$managerID][1] ?? 0);
+            $sheet->setCellValue("L{$row}", $items['statuses'][$managerID][1] ?? 0);
+            $sheet->setCellValue("M{$row}", $items['dynamic'][$managerID][1] ?? 0);
+            //Приглашение
+            $sheet->setCellValue("N{$row}", $items['week'][$managerID][2] ?? 0);
+            $sheet->setCellValue("O{$row}", $items['statuses'][$managerID][2] ?? 0);
+            $sheet->setCellValue("P{$row}", $items['dynamic'][$managerID][2] ?? 0);
+            //Планируют
+            $sheet->setCellValue("Q{$row}", $items['week'][$managerID][3] ?? 0);
+            $sheet->setCellValue("R{$row}", $items['statuses'][$managerID][3] ?? 0);
+            $sheet->setCellValue("S{$row}", $items['dynamic'][$managerID][3] ?? 0);
+            //Заявка
+            $sheet->setCellValue("T{$row}", $items['week'][$managerID][4] ?? 0);
+            $sheet->setCellValue("U{$row}", $items['statuses'][$managerID][4] ?? 0);
+            $sheet->setCellValue("V{$row}", $items['dynamic'][$managerID][4] ?? 0);
+            //Соэкспонент
+            $sheet->setCellValue("W{$row}", $items['week'][$managerID][5] ?? 0);
+            $sheet->setCellValue("X{$row}", $items['statuses'][$managerID][5] ?? 0);
+            $sheet->setCellValue("Y{$row}", $items['dynamic'][$managerID][5] ?? 0);
+            //Соэкспонент без оплаты
+            $sheet->setCellValue("Z{$row}", $items['week'][$managerID][6] ?? 0);
+            $sheet->setCellValue("AA{$row}", $items['statuses'][$managerID][6] ?? 0);
+            $sheet->setCellValue("AB{$row}", $items['dynamic'][$managerID][6] ?? 0);
+            //Некоммерческий
+            $sheet->setCellValue("AC{$row}", $items['week'][$managerID][9] ?? 0);
+            $sheet->setCellValue("AD{$row}", $items['statuses'][$managerID][9] ?? 0);
+            $sheet->setCellValue("AE{$row}", $items['dynamic'][$managerID][9] ?? 0);
+            //Счёт
+            $sheet->setCellValue("AF{$row}", $items['week'][$managerID][10] ?? 0);
+            $sheet->setCellValue("AG{$row}", $items['statuses'][$managerID][10] ?? 0);
+            $sheet->setCellValue("AH{$row}", $items['dynamic'][$managerID][10] ?? 0);
+
             $row++;
         }
         //Итого
         $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        $sheet->setCellValue("B{$row}", $items['total']['statuses_week'][0]);
-        $sheet->setCellValue("C{$row}", $items['total']['statuses'][0]);
-        $sheet->setCellValue("D{$row}", $items['total']['dynamic_by_statuses'][0]);
-        $sheet->setCellValue("E{$row}", $items['total']['statuses_week'][1]);
-        $sheet->setCellValue("F{$row}", $items['total']['statuses'][1]);
-        $sheet->setCellValue("G{$row}", $items['total']['dynamic_by_statuses'][1]);
-        $sheet->setCellValue("H{$row}", $items['total']['statuses_week'][2]);
-        $sheet->setCellValue("I{$row}", $items['total']['statuses'][2]);
-        $sheet->setCellValue("J{$row}", $items['total']['dynamic_by_statuses'][2]);
-        $sheet->setCellValue("K{$row}", $items['total']['statuses_week'][3]);
-        $sheet->setCellValue("L{$row}", $items['total']['statuses'][3]);
-        $sheet->setCellValue("M{$row}", $items['total']['dynamic_by_statuses'][3]);
-        $sheet->setCellValue("N{$row}", $items['total']['statuses_week'][4]);
-        $sheet->setCellValue("O{$row}", $items['total']['statuses'][4]);
-        $sheet->setCellValue("P{$row}", $items['total']['dynamic_by_statuses'][4]);
-        $sheet->setCellValue("Q{$row}", $items['total']['statuses_week'][10]);
-        $sheet->setCellValue("R{$row}", $items['total']['statuses'][10]);
-        $sheet->setCellValue("S{$row}", $items['total']['dynamic_by_statuses'][10]);
-        $sheet->setCellValue("T{$row}", $items['total']['week']);
-        $sheet->setCellValue("U{$row}", $items['total']['today']);
-        $sheet->setCellValue("V{$row}", $items['total']['dynamic']);
+        //Итого
+        $sheet->setCellValue("B{$row}", $items['total']['week'] ?? 0);
+        $sheet->setCellValue("C{$row}", $items['total']['today'] ?? 0);
+        $sheet->setCellValue("D{$row}", $items['total']['dynamic'] ?? 0);
+        //В проекте
+        $sheet->setCellValue("E{$row}", $items['total']['statuses_week'][-1] ?? 0);
+        $sheet->setCellValue("F{$row}", $items['total']['statuses'][-1] ?? 0);
+        $sheet->setCellValue("G{$row}", $items['total']['dynamic_by_statuses'][-1] ?? 0);
+        //Отказ
+        $sheet->setCellValue("H{$row}", $items['total']['statuses_week'][0] ?? 0);
+        $sheet->setCellValue("I{$row}", $items['total']['statuses'][0] ?? 0);
+        $sheet->setCellValue("J{$row}", $items['total']['dynamic_by_statuses'][0] ?? 0);
+        //Договор
+        $sheet->setCellValue("K{$row}", $items['total']['statuses_week'][1] ?? 0);
+        $sheet->setCellValue("L{$row}", $items['total']['statuses'][1] ?? 0);
+        $sheet->setCellValue("M{$row}", $items['total']['dynamic_by_statuses'][1] ?? 0);
+        //Приглашение
+        $sheet->setCellValue("N{$row}", $items['total']['statuses_week'][2] ?? 0);
+        $sheet->setCellValue("O{$row}", $items['total']['statuses'][2] ?? 0);
+        $sheet->setCellValue("P{$row}", $items['total']['dynamic_by_statuses'][2] ?? 0);
+        //Планируют
+        $sheet->setCellValue("Q{$row}", $items['total']['statuses_week'][3] ?? 0);
+        $sheet->setCellValue("R{$row}", $items['total']['statuses'][3] ?? 0);
+        $sheet->setCellValue("S{$row}", $items['total']['dynamic_by_statuses'][3] ?? 0);
+        //Заявка
+        $sheet->setCellValue("T{$row}", $items['total']['statuses_week'][4] ?? 0);
+        $sheet->setCellValue("U{$row}", $items['total']['statuses'][4] ?? 0);
+        $sheet->setCellValue("V{$row}", $items['total']['dynamic_by_statuses'][4] ?? 0);
+        //Соэкспонент
+        $sheet->setCellValue("W{$row}", $items['total']['statuses_week'][5] ?? 0);
+        $sheet->setCellValue("X{$row}", $items['total']['statuses'][5] ?? 0);
+        $sheet->setCellValue("Y{$row}", $items['total']['dynamic_by_statuses'][5] ?? 0);
+        //Соэкспонент без оплаты
+        $sheet->setCellValue("Z{$row}", $items['total']['statuses_week'][6] ?? 0);
+        $sheet->setCellValue("AA{$row}", $items['total']['statuses'][6] ?? 0);
+        $sheet->setCellValue("AB{$row}", $items['total']['dynamic_by_statuses'][6] ?? 0);
+        //Некоммерческий
+        $sheet->setCellValue("AC{$row}", $items['total']['statuses_week'][9] ?? 0);
+        $sheet->setCellValue("AD{$row}", $items['total']['statuses'][9] ?? 0);
+        $sheet->setCellValue("AE{$row}", $items['total']['dynamic_by_statuses'][9] ?? 0);
+        //Счёт
+        $sheet->setCellValue("AF{$row}", $items['total']['statuses_week'][10] ?? 0);
+        $sheet->setCellValue("AG{$row}", $items['total']['statuses'][10] ?? 0);
+        $sheet->setCellValue("AH{$row}", $items['total']['dynamic_by_statuses'][10] ?? 0);
+
 
         //Платежи
         $xls->createSheet();
@@ -521,165 +624,140 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("BA3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
         $sheet->setCellValue("BB3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
         $sheet->setCellValue("BC3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
-        //НПФ ОРТ
-        $sheet->setCellValue("BD1", JText::sprintf('COM_PRICES_ITEM_SQUARE_TYPE_9'));
-        $sheet->setCellValue("BD2", $date_1);
-        $sheet->setCellValue("BF2", $date_2);
-        $sheet->setCellValue("BH2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        $sheet->setCellValue("BD3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("BE3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
-        $sheet->setCellValue("BF3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("BG3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
-        $sheet->setCellValue("BH3", JText::sprintf('COM_REPORTS_HEAD_RUB'));
-        $sheet->setCellValue("BI3", JText::sprintf('COM_REPORTS_HEAD_METRES'));
 
         //Данные
         $row = 4; //Строка, с которой начнаются данные
         foreach ($items['squares']['managers'] as $managerID => $item) {
             $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
             //Итого
-            $sheet->setCellValue("B{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['amount']);
-            $sheet->setCellValue("C{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['square']);
-            $sheet->setCellValue("D{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['amount']);
-            $sheet->setCellValue("E{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['square']);
-            $sheet->setCellValue("F{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['amount']);
-            $sheet->setCellValue("G{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['square']);
+            $sheet->setCellValue("B{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['amount'] ?? 0);
+            $sheet->setCellValue("C{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['square'] ?? 0);
+            $sheet->setCellValue("D{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['amount'] ?? 0);
+            $sheet->setCellValue("E{$row}", $items['squares']['total_by_manager'][$managerID]['current']['rub']['square'] ?? 0);
+            $sheet->setCellValue("F{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['amount'] ?? 0);
+            $sheet->setCellValue("G{$row}", $items['squares']['total_by_manager'][$managerID]['dynamic']['rub']['square'] ?? 0);
             //Экспоместо
-            $sheet->setCellValue("H{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['amount']);
-            $sheet->setCellValue("I{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['square']);
-            $sheet->setCellValue("J{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['amount']);
-            $sheet->setCellValue("K{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['square']);
-            $sheet->setCellValue("L{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['amount']);
-            $sheet->setCellValue("M{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['square']);
+            $sheet->setCellValue("H{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("I{$row}", $items['squares']['managers'][$managerID]['week'][1]['rub']['square'] ?? 0);
+            $sheet->setCellValue("J{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("K{$row}", $items['squares']['managers'][$managerID]['current'][1]['rub']['square'] ?? 0);
+            $sheet->setCellValue("L{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("M{$row}", $items['squares']['managers'][$managerID]['dynamic'][1]['rub']['square'] ?? 0);
             //Премиум
-            $sheet->setCellValue("N{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['amount']);
-            $sheet->setCellValue("O{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['square']);
-            $sheet->setCellValue("P{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['amount']);
-            $sheet->setCellValue("Q{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['square']);
-            $sheet->setCellValue("R{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['amount']);
-            $sheet->setCellValue("S{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['square']);
+            $sheet->setCellValue("N{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("O{$row}", $items['squares']['managers'][$managerID]['week'][2]['rub']['square'] ?? 0);
+            $sheet->setCellValue("P{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("Q{$row}", $items['squares']['managers'][$managerID]['current'][2]['rub']['square'] ?? 0);
+            $sheet->setCellValue("R{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("S{$row}", $items['squares']['managers'][$managerID]['dynamic'][2]['rub']['square'] ?? 0);
             //Улица демонстрация
-            $sheet->setCellValue("T{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['amount']);
-            $sheet->setCellValue("U{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['square']);
-            $sheet->setCellValue("V{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['amount']);
-            $sheet->setCellValue("W{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['square']);
-            $sheet->setCellValue("X{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['amount']);
-            $sheet->setCellValue("Y{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['square']);
+            $sheet->setCellValue("T{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("U{$row}", $items['squares']['managers'][$managerID]['week'][3]['rub']['square'] ?? 0);
+            $sheet->setCellValue("V{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("W{$row}", $items['squares']['managers'][$managerID]['current'][3]['rub']['square'] ?? 0);
+            $sheet->setCellValue("X{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("Y{$row}", $items['squares']['managers'][$managerID]['dynamic'][3]['rub']['square'] ?? 0);
             //Улица застройка
-            $sheet->setCellValue("Z{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['amount']);
-            $sheet->setCellValue("AA{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['square']);
-            $sheet->setCellValue("AB{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['amount']);
-            $sheet->setCellValue("AC{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['square']);
-            $sheet->setCellValue("AD{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['amount']);
-            $sheet->setCellValue("AE{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['square']);
+            $sheet->setCellValue("Z{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AA{$row}", $items['squares']['managers'][$managerID]['week'][4]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AB{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AC{$row}", $items['squares']['managers'][$managerID]['current'][4]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AD{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AE{$row}", $items['squares']['managers'][$managerID]['dynamic'][4]['rub']['square'] ?? 0);
             //ВПК
-            $sheet->setCellValue("AF{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['amount']);
-            $sheet->setCellValue("AG{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['square']);
-            $sheet->setCellValue("AH{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['amount']);
-            $sheet->setCellValue("AI{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['square']);
-            $sheet->setCellValue("AJ{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['amount']);
-            $sheet->setCellValue("AK{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['square']);
+            $sheet->setCellValue("AF{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AG{$row}", $items['squares']['managers'][$managerID]['week'][5]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AH{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AI{$row}", $items['squares']['managers'][$managerID]['current'][5]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AJ{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AK{$row}", $items['squares']['managers'][$managerID]['dynamic'][5]['rub']['square'] ?? 0);
             //ВПК улица
-            $sheet->setCellValue("AL{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['amount']);
-            $sheet->setCellValue("AM{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['square']);
-            $sheet->setCellValue("AN{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['amount']);
-            $sheet->setCellValue("AO{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['square']);
-            $sheet->setCellValue("AP{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['amount']);
-            $sheet->setCellValue("AQ{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['square']);
+            $sheet->setCellValue("AL{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AM{$row}", $items['squares']['managers'][$managerID]['week'][6]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AN{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AO{$row}", $items['squares']['managers'][$managerID]['current'][6]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AP{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AQ{$row}", $items['squares']['managers'][$managerID]['dynamic'][6]['rub']['square'] ?? 0);
             //Второй премиум
-            $sheet->setCellValue("AR{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['amount']);
-            $sheet->setCellValue("AS{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['square']);
-            $sheet->setCellValue("AT{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['amount']);
-            $sheet->setCellValue("AU{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['square']);
-            $sheet->setCellValue("AV{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['amount']);
-            $sheet->setCellValue("AW{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['square']);
+            $sheet->setCellValue("AR{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AS{$row}", $items['squares']['managers'][$managerID]['week'][7]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AT{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AU{$row}", $items['squares']['managers'][$managerID]['current'][7]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AV{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AW{$row}", $items['squares']['managers'][$managerID]['dynamic'][7]['rub']['square'] ?? 0);
             //Второй премиум
-            $sheet->setCellValue("AX{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['amount']);
-            $sheet->setCellValue("AY{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['square']);
-            $sheet->setCellValue("AZ{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['amount']);
-            $sheet->setCellValue("BA{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['square']);
-            $sheet->setCellValue("BB{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['amount']);
-            $sheet->setCellValue("BC{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['square']);
-            //НПФ ОРТ
-            $sheet->setCellValue("BD{$row}", $items['squares']['managers'][$managerID]['week'][9]['rub']['amount']);
-            $sheet->setCellValue("BE{$row}", $items['squares']['managers'][$managerID]['week'][9]['rub']['square']);
-            $sheet->setCellValue("BF{$row}", $items['squares']['managers'][$managerID]['current'][9]['rub']['amount']);
-            $sheet->setCellValue("BJ{$row}", $items['squares']['managers'][$managerID]['current'][9]['rub']['square']);
-            $sheet->setCellValue("BH{$row}", $items['squares']['managers'][$managerID]['dynamic'][9]['rub']['amount']);
-            $sheet->setCellValue("BI{$row}", $items['squares']['managers'][$managerID]['dynamic'][9]['rub']['square']);
+            $sheet->setCellValue("AX{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("AY{$row}", $items['squares']['managers'][$managerID]['week'][8]['rub']['square'] ?? 0);
+            $sheet->setCellValue("AZ{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("BA{$row}", $items['squares']['managers'][$managerID]['current'][8]['rub']['square'] ?? 0);
+            $sheet->setCellValue("BB{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['amount'] ?? 0);
+            $sheet->setCellValue("BC{$row}", $items['squares']['managers'][$managerID]['dynamic'][8]['rub']['square'] ?? 0);
             $row++;
         }
         //Итого
         $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        $sheet->setCellValue("B{$row}", $items['squares']['total_by_period']['rub']['week']['amount']);
-        $sheet->setCellValue("C{$row}", $items['squares']['total_by_period']['rub']['week']['square']);
-        $sheet->setCellValue("D{$row}", $items['squares']['total_by_period']['rub']['current']['amount']);
-        $sheet->setCellValue("E{$row}", $items['squares']['total_by_period']['rub']['current']['square']);
-        $sheet->setCellValue("F{$row}", $items['squares']['total_by_period']['rub']['dynamic']['amount']);
-        $sheet->setCellValue("G{$row}", $items['squares']['total_by_period']['rub']['dynamic']['square']);
+        $sheet->setCellValue("B{$row}", $items['squares']['total_by_period']['rub']['week']['amount'] ?? 0);
+        $sheet->setCellValue("C{$row}", $items['squares']['total_by_period']['rub']['week']['square'] ?? 0);
+        $sheet->setCellValue("D{$row}", $items['squares']['total_by_period']['rub']['current']['amount'] ?? 0);
+        $sheet->setCellValue("E{$row}", $items['squares']['total_by_period']['rub']['current']['square'] ?? 0);
+        $sheet->setCellValue("F{$row}", $items['squares']['total_by_period']['rub']['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("G{$row}", $items['squares']['total_by_period']['rub']['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("H{$row}", $items['squares']['total']['rub'][1]['week']['amount']);
-        $sheet->setCellValue("I{$row}", $items['squares']['total']['rub'][1]['week']['square']);
-        $sheet->setCellValue("J{$row}", $items['squares']['total']['rub'][1]['current']['amount']);
-        $sheet->setCellValue("K{$row}", $items['squares']['total']['rub'][1]['current']['square']);
-        $sheet->setCellValue("L{$row}", $items['squares']['total']['rub'][1]['dynamic']['amount']);
-        $sheet->setCellValue("M{$row}", $items['squares']['total']['rub'][1]['dynamic']['square']);
+        $sheet->setCellValue("H{$row}", $items['squares']['total']['rub'][1]['week']['amount'] ?? 0);
+        $sheet->setCellValue("I{$row}", $items['squares']['total']['rub'][1]['week']['square'] ?? 0);
+        $sheet->setCellValue("J{$row}", $items['squares']['total']['rub'][1]['current']['amount'] ?? 0);
+        $sheet->setCellValue("K{$row}", $items['squares']['total']['rub'][1]['current']['square'] ?? 0);
+        $sheet->setCellValue("L{$row}", $items['squares']['total']['rub'][1]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("M{$row}", $items['squares']['total']['rub'][1]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("N{$row}", $items['squares']['total']['rub'][2]['week']['amount']);
-        $sheet->setCellValue("O{$row}", $items['squares']['total']['rub'][2]['week']['square']);
-        $sheet->setCellValue("P{$row}", $items['squares']['total']['rub'][2]['current']['amount']);
-        $sheet->setCellValue("Q{$row}", $items['squares']['total']['rub'][2]['current']['square']);
-        $sheet->setCellValue("R{$row}", $items['squares']['total']['rub'][2]['dynamic']['amount']);
-        $sheet->setCellValue("S{$row}", $items['squares']['total']['rub'][2]['dynamic']['square']);
+        $sheet->setCellValue("N{$row}", $items['squares']['total']['rub'][2]['week']['amount'] ?? 0);
+        $sheet->setCellValue("O{$row}", $items['squares']['total']['rub'][2]['week']['square'] ?? 0);
+        $sheet->setCellValue("P{$row}", $items['squares']['total']['rub'][2]['current']['amount'] ?? 0);
+        $sheet->setCellValue("Q{$row}", $items['squares']['total']['rub'][2]['current']['square'] ?? 0);
+        $sheet->setCellValue("R{$row}", $items['squares']['total']['rub'][2]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("S{$row}", $items['squares']['total']['rub'][2]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("T{$row}", $items['squares']['total']['rub'][3]['week']['amount']);
-        $sheet->setCellValue("U{$row}", $items['squares']['total']['rub'][3]['week']['square']);
-        $sheet->setCellValue("V{$row}", $items['squares']['total']['rub'][3]['current']['amount']);
-        $sheet->setCellValue("W{$row}", $items['squares']['total']['rub'][3]['current']['square']);
-        $sheet->setCellValue("X{$row}", $items['squares']['total']['rub'][3]['dynamic']['amount']);
-        $sheet->setCellValue("Y{$row}", $items['squares']['total']['rub'][3]['dynamic']['square']);
+        $sheet->setCellValue("T{$row}", $items['squares']['total']['rub'][3]['week']['amount'] ?? 0);
+        $sheet->setCellValue("U{$row}", $items['squares']['total']['rub'][3]['week']['square'] ?? 0);
+        $sheet->setCellValue("V{$row}", $items['squares']['total']['rub'][3]['current']['amount'] ?? 0);
+        $sheet->setCellValue("W{$row}", $items['squares']['total']['rub'][3]['current']['square'] ?? 0);
+        $sheet->setCellValue("X{$row}", $items['squares']['total']['rub'][3]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("Y{$row}", $items['squares']['total']['rub'][3]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("Z{$row}", $items['squares']['total']['rub'][4]['week']['amount']);
-        $sheet->setCellValue("AA{$row}", $items['squares']['total']['rub'][4]['week']['square']);
-        $sheet->setCellValue("AB{$row}", $items['squares']['total']['rub'][4]['current']['amount']);
-        $sheet->setCellValue("AC{$row}", $items['squares']['total']['rub'][4]['current']['square']);
-        $sheet->setCellValue("AD{$row}", $items['squares']['total']['rub'][4]['dynamic']['amount']);
-        $sheet->setCellValue("AE{$row}", $items['squares']['total']['rub'][4]['dynamic']['square']);
+        $sheet->setCellValue("Z{$row}", $items['squares']['total']['rub'][4]['week']['amount'] ?? 0);
+        $sheet->setCellValue("AA{$row}", $items['squares']['total']['rub'][4]['week']['square'] ?? 0);
+        $sheet->setCellValue("AB{$row}", $items['squares']['total']['rub'][4]['current']['amount'] ?? 0);
+        $sheet->setCellValue("AC{$row}", $items['squares']['total']['rub'][4]['current']['square'] ?? 0);
+        $sheet->setCellValue("AD{$row}", $items['squares']['total']['rub'][4]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("AE{$row}", $items['squares']['total']['rub'][4]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("AF{$row}", $items['squares']['total']['rub'][5]['week']['amount']);
-        $sheet->setCellValue("AG{$row}", $items['squares']['total']['rub'][5]['week']['square']);
-        $sheet->setCellValue("AH{$row}", $items['squares']['total']['rub'][5]['current']['amount']);
-        $sheet->setCellValue("AI{$row}", $items['squares']['total']['rub'][5]['current']['square']);
-        $sheet->setCellValue("AJ{$row}", $items['squares']['total']['rub'][5]['dynamic']['amount']);
-        $sheet->setCellValue("AK{$row}", $items['squares']['total']['rub'][5]['dynamic']['square']);
+        $sheet->setCellValue("AF{$row}", $items['squares']['total']['rub'][5]['week']['amount'] ?? 0);
+        $sheet->setCellValue("AG{$row}", $items['squares']['total']['rub'][5]['week']['square'] ?? 0);
+        $sheet->setCellValue("AH{$row}", $items['squares']['total']['rub'][5]['current']['amount'] ?? 0);
+        $sheet->setCellValue("AI{$row}", $items['squares']['total']['rub'][5]['current']['square'] ?? 0);
+        $sheet->setCellValue("AJ{$row}", $items['squares']['total']['rub'][5]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("AK{$row}", $items['squares']['total']['rub'][5]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("AL{$row}", $items['squares']['total']['rub'][6]['week']['amount']);
-        $sheet->setCellValue("AM{$row}", $items['squares']['total']['rub'][6]['week']['square']);
-        $sheet->setCellValue("AN{$row}", $items['squares']['total']['rub'][6]['current']['amount']);
-        $sheet->setCellValue("AO{$row}", $items['squares']['total']['rub'][6]['current']['square']);
-        $sheet->setCellValue("AP{$row}", $items['squares']['total']['rub'][6]['dynamic']['amount']);
-        $sheet->setCellValue("AQ{$row}", $items['squares']['total']['rub'][6]['dynamic']['square']);
+        $sheet->setCellValue("AL{$row}", $items['squares']['total']['rub'][6]['week']['amount'] ?? 0);
+        $sheet->setCellValue("AM{$row}", $items['squares']['total']['rub'][6]['week']['square'] ?? 0);
+        $sheet->setCellValue("AN{$row}", $items['squares']['total']['rub'][6]['current']['amount'] ?? 0);
+        $sheet->setCellValue("AO{$row}", $items['squares']['total']['rub'][6]['current']['square'] ?? 0);
+        $sheet->setCellValue("AP{$row}", $items['squares']['total']['rub'][6]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("AQ{$row}", $items['squares']['total']['rub'][6]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("AR{$row}", $items['squares']['total']['rub'][7]['week']['amount']);
-        $sheet->setCellValue("AS{$row}", $items['squares']['total']['rub'][7]['week']['square']);
-        $sheet->setCellValue("AT{$row}", $items['squares']['total']['rub'][7]['current']['amount']);
-        $sheet->setCellValue("AU{$row}", $items['squares']['total']['rub'][7]['current']['square']);
-        $sheet->setCellValue("AV{$row}", $items['squares']['total']['rub'][7]['dynamic']['amount']);
-        $sheet->setCellValue("AW{$row}", $items['squares']['total']['rub'][7]['dynamic']['square']);
+        $sheet->setCellValue("AR{$row}", $items['squares']['total']['rub'][7]['week']['amount'] ?? 0);
+        $sheet->setCellValue("AS{$row}", $items['squares']['total']['rub'][7]['week']['square'] ?? 0);
+        $sheet->setCellValue("AT{$row}", $items['squares']['total']['rub'][7]['current']['amount'] ?? 0);
+        $sheet->setCellValue("AU{$row}", $items['squares']['total']['rub'][7]['current']['square'] ?? 0);
+        $sheet->setCellValue("AV{$row}", $items['squares']['total']['rub'][7]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("AW{$row}", $items['squares']['total']['rub'][7]['dynamic']['square'] ?? 0);
 
-        $sheet->setCellValue("AX{$row}", $items['squares']['total']['rub'][8]['week']['amount']);
-        $sheet->setCellValue("AY{$row}", $items['squares']['total']['rub'][8]['week']['square']);
-        $sheet->setCellValue("AZ{$row}", $items['squares']['total']['rub'][8]['current']['amount']);
-        $sheet->setCellValue("BA{$row}", $items['squares']['total']['rub'][8]['current']['square']);
-        $sheet->setCellValue("BB{$row}", $items['squares']['total']['rub'][8]['dynamic']['amount']);
-        $sheet->setCellValue("BC{$row}", $items['squares']['total']['rub'][8]['dynamic']['square']);
-
-        $sheet->setCellValue("BD{$row}", $items['squares']['total']['rub'][9]['week']['amount']);
-        $sheet->setCellValue("BE{$row}", $items['squares']['total']['rub'][9]['week']['square']);
-        $sheet->setCellValue("BF{$row}", $items['squares']['total']['rub'][9]['current']['amount']);
-        $sheet->setCellValue("BG{$row}", $items['squares']['total']['rub'][9]['current']['square']);
-        $sheet->setCellValue("BH{$row}", $items['squares']['total']['rub'][9]['dynamic']['amount']);
-        $sheet->setCellValue("BI{$row}", $items['squares']['total']['rub'][9]['dynamic']['square']);
+        $sheet->setCellValue("AX{$row}", $items['squares']['total']['rub'][8]['week']['amount'] ?? 0);
+        $sheet->setCellValue("AY{$row}", $items['squares']['total']['rub'][8]['week']['square'] ?? 0);
+        $sheet->setCellValue("AZ{$row}", $items['squares']['total']['rub'][8]['current']['amount'] ?? 0);
+        $sheet->setCellValue("BA{$row}", $items['squares']['total']['rub'][8]['current']['square'] ?? 0);
+        $sheet->setCellValue("BB{$row}", $items['squares']['total']['rub'][8]['dynamic']['amount'] ?? 0);
+        $sheet->setCellValue("BC{$row}", $items['squares']['total']['rub'][8]['dynamic']['square'] ?? 0);
 
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
