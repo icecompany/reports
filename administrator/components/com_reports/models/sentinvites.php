@@ -139,16 +139,16 @@ class ReportsModelSentInvites extends ListModel
                 $result['total']['statuses_week'][10] += (int) $item->status_10;
             }
             else {
-                $result['statuses'][$item->managerID][-1] = (int) $item->$is1 ?? 0;
-                $result['statuses'][$item->managerID][0] = (int) $item->status_0 ?? 0;
-                $result['statuses'][$item->managerID][1] = (int) $item->status_1 ?? 0;
-                $result['statuses'][$item->managerID][2] = (int) $item->status_2 ?? 0;
-                $result['statuses'][$item->managerID][3] = (int) $item->status_3 ?? 0;
-                $result['statuses'][$item->managerID][4] = (int) $item->status_4 ?? 0;
-                $result['statuses'][$item->managerID][5] = (int) $item->status_5 ?? 0;
-                $result['statuses'][$item->managerID][6] = (int) $item->status_6 ?? 0;
-                $result['statuses'][$item->managerID][9] = (int) $item->status_9 ?? 0;
-                $result['statuses'][$item->managerID][10] = (int) $item->status_10 ?? 0;
+                $result['statuses'][$item->managerID][-1] = (int) $item->$is1;
+                $result['statuses'][$item->managerID][0] = (int) $item->status_0;
+                $result['statuses'][$item->managerID][1] = (int) $item->status_1;
+                $result['statuses'][$item->managerID][2] = (int) $item->status_2;
+                $result['statuses'][$item->managerID][3] = (int) $item->status_3;
+                $result['statuses'][$item->managerID][4] = (int) $item->status_4;
+                $result['statuses'][$item->managerID][5] = (int) $item->status_5;
+                $result['statuses'][$item->managerID][6] = (int) $item->status_6;
+                $result['statuses'][$item->managerID][9] = (int) $item->status_9;
+                $result['statuses'][$item->managerID][10] = (int) $item->status_10;
                 if (!isset($result['total']['statuses'][-1])) $result['total']['statuses'][-1] = 0;
                 if (!isset($result['total']['statuses'][0])) $result['total']['statuses'][0] = 0;
                 if (!isset($result['total']['statuses'][1])) $result['total']['statuses'][1] = 0;
@@ -170,9 +170,7 @@ class ReportsModelSentInvites extends ListModel
                 $result['total']['statuses'][9] += (int) $item->status_9;
                 $result['total']['statuses'][10] += (int) $item->status_10;
             }
-            if (isset($result['items'][$item->managerID]['today']) && isset($result['items'][$item->managerID]['week'])) {
-                $result['items'][$item->managerID]['dynamic'] = (int) $result['items'][$item->managerID]['today'] - (int) $result['items'][$item->managerID]['week'];
-            }
+            $result['items'][$item->managerID]['dynamic'] = (int) $result['items'][$item->managerID]['today'] - (int) $result['items'][$item->managerID]['week'];
         }
         $result['total']['dynamic'] = (int) $result['total']['today'] - (int) $result['total']['week'];
 
