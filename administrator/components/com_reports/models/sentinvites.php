@@ -44,7 +44,7 @@ class ReportsModelSentInvites extends ListModel
         $query
             ->select("u.name as manager")
             ->select("ms.*")
-            ->select("ms.status_0 + ms.status_1 + ms.status_2 + ms.status_3 + ms.status_4 + ms.status_10 as invites")
+            ->select("ms.`status_-1`, ms.status_0 + ms.status_1 + ms.status_2 + ms.status_3 + ms.status_4 + ms.status_5 + ms.status_6 + ms.status_9 + ms.status_10 as invites")
             ->from("#__mkv_managers_stat ms")
             ->leftJoin("s7vi9_users u on ms.managerID = u.id");
 
