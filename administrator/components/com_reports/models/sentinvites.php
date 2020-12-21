@@ -46,7 +46,8 @@ class ReportsModelSentInvites extends ListModel
             ->select("ms.*")
             ->select("ms.`status_-1`, ms.status_0 + ms.status_1 + ms.status_2 + ms.status_3 + ms.status_4 + ms.status_5 + ms.status_6 + ms.status_9 + ms.status_10 as invites")
             ->from("#__mkv_managers_stat ms")
-            ->leftJoin("s7vi9_users u on ms.managerID = u.id");
+            ->leftJoin("s7vi9_users u on ms.managerID = u.id")
+            ->having("invites > 0");
 
         $project = PrjHelper::getActiveProject();
         $date_1 = $this->getState('filter.date_1');
@@ -95,97 +96,55 @@ class ReportsModelSentInvites extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'statuses' => [], 'week' => [], 'squares' => [], 'dynamic' => [], 'managers' => [], 'invites' => [], 'payments' => [], 'total' => ['today' => 0, 'week' => 0, 'dynamic_by_statuses' => [], 'dynamic' => 0, 'statuses_week' => [], 'statuses' => []]];
+        $result = ['statuses' => [], 'squares' => [], 'invites' => [], 'payments' => []];
         $items = parent::getItems();
+        $statuses = [-1, 0, 1, 2, 3, 4, 5, 6, 9, 10];
+        $periods = ['week', 'current', 'dynamic'];
+        $result_new = [
+            'managers' => [], //Список менеджеров
+            'statuses' => [],
+            'total' => [
+                'super' => ['week' => 0, 'current' => 0, 'dynamic' => 0], //Итоговая суммарная статистика
+                'manager' => [], //По менеджерам
+                'statuses' => [] //По статусам
+            ]
+        ];
+        $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
         foreach ($items as $item) {
-            $is1 = "status_-1";
-            $now = JDate::getInstance($this->state->get('filter.date_2'))->format("Y-m-d");
-
-            if (!isset($result['managers'][$item->managerID])) $result['managers'][$item->managerID] = MkvHelper::getLastAndFirstNames($item->manager);
-            if (!isset($result['items'][$item->managerID])) $result['items'][$item->managerID] = [];
-            $day = ($item->dat !== $now) ? 'week' : 'today';
-            $result['items'][$item->managerID][$day] = $item->invites;
-            $result['total'][$day] += $item->invites;
-            if ($day !== 'today') {
-                $result['week'][$item->managerID][-1] = (int) $item->$is1;
-                $result['week'][$item->managerID][0] = (int) $item->status_0;
-                $result['week'][$item->managerID][1] = (int) $item->status_1;
-                $result['week'][$item->managerID][2] = (int) $item->status_2;
-                $result['week'][$item->managerID][3] = (int) $item->status_3;
-                $result['week'][$item->managerID][4] = (int) $item->status_4;
-                $result['week'][$item->managerID][5] = (int) $item->status_5;
-                $result['week'][$item->managerID][6] = (int) $item->status_6;
-                $result['week'][$item->managerID][9] = (int) $item->status_9;
-                $result['week'][$item->managerID][10] = (int) $item->status_10;
-                if (!isset($result['total']['statuses_week'][-1])) $result['total']['statuses_week'][-1] = 0;
-                if (!isset($result['total']['statuses_week'][0])) $result['total']['statuses_week'][0] = 0;
-                if (!isset($result['total']['statuses_week'][1])) $result['total']['statuses_week'][1] = 0;
-                if (!isset($result['total']['statuses_week'][2])) $result['total']['statuses_week'][2] = 0;
-                if (!isset($result['total']['statuses_week'][3])) $result['total']['statuses_week'][3] = 0;
-                if (!isset($result['total']['statuses_week'][4])) $result['total']['statuses_week'][4] = 0;
-                if (!isset($result['total']['statuses_week'][5])) $result['total']['statuses_week'][5] = 0;
-                if (!isset($result['total']['statuses_week'][6])) $result['total']['statuses_week'][6] = 0;
-                if (!isset($result['total']['statuses_week'][9])) $result['total']['statuses_week'][9] = 0;
-                if (!isset($result['total']['statuses_week'][10])) $result['total']['statuses_week'][10] = 0;
-                $result['total']['statuses_week'][-1] += (int) $item->$is1;
-                $result['total']['statuses_week'][0] += (int) $item->status_0;
-                $result['total']['statuses_week'][1] += (int) $item->status_1;
-                $result['total']['statuses_week'][2] += (int) $item->status_2;
-                $result['total']['statuses_week'][3] += (int) $item->status_3;
-                $result['total']['statuses_week'][4] += (int) $item->status_4;
-                $result['total']['statuses_week'][5] += (int) $item->status_5;
-                $result['total']['statuses_week'][6] += (int) $item->status_6;
-                $result['total']['statuses_week'][9] += (int) $item->status_9;
-                $result['total']['statuses_week'][10] += (int) $item->status_10;
+            if (!isset($result_new['managers'][$item->managerID])) {
+                //Инициализация массива
+                $result_new['managers'][$item->managerID] = MkvHelper::getLastAndFirstNames($item->manager);
+                foreach ($statuses as $status) {
+                    foreach ($periods as $period) {
+                        if (!isset($result_new['statuses'][$item->managerID][$status][$period])) $result_new['statuses'][$item->managerID][$status][$period] = 0;
+                        if (!isset($result_new['total']['manager'][$item->managerID][$period])) $result_new['total']['manager'][$item->managerID][$period] = 0;
+                        if (!isset($result_new['total']['statuses'][$status][$period])) $result_new['total']['statuses'][$status][$period] = 0;
+                    }
+                }
             }
-            else {
-                $result['statuses'][$item->managerID][-1] = (int) $item->$is1;
-                $result['statuses'][$item->managerID][0] = (int) $item->status_0;
-                $result['statuses'][$item->managerID][1] = (int) $item->status_1;
-                $result['statuses'][$item->managerID][2] = (int) $item->status_2;
-                $result['statuses'][$item->managerID][3] = (int) $item->status_3;
-                $result['statuses'][$item->managerID][4] = (int) $item->status_4;
-                $result['statuses'][$item->managerID][5] = (int) $item->status_5;
-                $result['statuses'][$item->managerID][6] = (int) $item->status_6;
-                $result['statuses'][$item->managerID][9] = (int) $item->status_9;
-                $result['statuses'][$item->managerID][10] = (int) $item->status_10;
-                if (!isset($result['total']['statuses'][-1])) $result['total']['statuses'][-1] = 0;
-                if (!isset($result['total']['statuses'][0])) $result['total']['statuses'][0] = 0;
-                if (!isset($result['total']['statuses'][1])) $result['total']['statuses'][1] = 0;
-                if (!isset($result['total']['statuses'][2])) $result['total']['statuses'][2] = 0;
-                if (!isset($result['total']['statuses'][3])) $result['total']['statuses'][3] = 0;
-                if (!isset($result['total']['statuses'][4])) $result['total']['statuses'][4] = 0;
-                if (!isset($result['total']['statuses'][5])) $result['total']['statuses'][5] = 0;
-                if (!isset($result['total']['statuses'][6])) $result['total']['statuses'][6] = 0;
-                if (!isset($result['total']['statuses'][9])) $result['total']['statuses'][9] = 0;
-                if (!isset($result['total']['statuses'][10])) $result['total']['statuses'][10] = 0;
-                $result['total']['statuses'][-1] += (int) $item->$is1;
-                $result['total']['statuses'][0] += (int) $item->status_0;
-                $result['total']['statuses'][1] += (int) $item->status_1;
-                $result['total']['statuses'][2] += (int) $item->status_2;
-                $result['total']['statuses'][3] += (int) $item->status_3;
-                $result['total']['statuses'][4] += (int) $item->status_4;
-                $result['total']['statuses'][5] += (int) $item->status_5;
-                $result['total']['statuses'][6] += (int) $item->status_6;
-                $result['total']['statuses'][9] += (int) $item->status_9;
-                $result['total']['statuses'][10] += (int) $item->status_10;
+            $day = ($item->dat !== $now) ? 'week' : 'current';
+            foreach ($statuses as $status) {
+                $elem = "status_{$status}";
+                //Плюсуем значения статусов
+                $result_new['statuses'][$item->managerID][$status][$day] += (int) ($item->$elem);
+                $result_new['total']['super'][$day] += (int) ($item->$elem);
+                $result_new['total']['manager'][$item->managerID][$day] += (int) ($item->$elem);
+                $result_new['total']['statuses'][$status][$day] += (int) ($item->$elem);
+                //Плюсуем динамику
+                $result_new['total']['super']['dynamic'] = (int) ($result_new['total']['super']['current'] - $result_new['total']['super']['week']);
+                $result_new['statuses'][$item->managerID][$status]['dynamic'] = (int) ($result_new['statuses'][$item->managerID][$status]['current'] - $result_new['statuses'][$item->managerID][$status]['week']);
+                $result_new['total']['manager'][$item->managerID]['dynamic'] = (int) ($result_new['total']['manager'][$item->managerID]['current'] - $result_new['total']['manager'][$item->managerID]['week']);
+                $result_new['total']['statuses'][$status]['dynamic'] = (int) ($result_new['total']['statuses'][$status]['current'] - $result_new['total']['statuses'][$status]['week']);
             }
-            $result['items'][$item->managerID]['dynamic'] = (int) $result['items'][$item->managerID]['today'] - (int) $result['items'][$item->managerID]['week'];
         }
-        $result['total']['dynamic'] = (int) $result['total']['today'] - (int) $result['total']['week'];
 
         $project = PrjHelper::getActiveProject();
         $previous = PrjHelper::getPreviousProject($project);
+
+        $result['statuses'] = $result_new;
         $result['payments'] = $this->getPayments($previous, $project);
         $result['invites'] = $this->getSentInvites($previous, $project);
         $result['squares'] = $this->getSquares($previous, $project);
-
-        foreach ([-1, 0, 1, 2, 3, 4, 5, 6, 9, 10] as $status) {
-            foreach ($result['managers'] as $managerID => $manager) {
-                $result['dynamic'][$managerID][$status] = $result['statuses'][$managerID][$status] - $result['week'][$managerID][$status];
-            }
-            $result['total']['dynamic_by_statuses'][$status] = (int) $result['total']['statuses'][$status] - (int) $result['total']['statuses_week'][$status];
-        }
 
         return $result;
     }
@@ -204,8 +163,10 @@ class ReportsModelSentInvites extends ListModel
         //Статусы
         $xls->setActiveSheetIndex();
         $sheet = $xls->getActiveSheet();
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_STATUSES_DYNAMIC'));
 
         $statuses = $this->loadContractStatuses();
+        $status_codes = [-1, 0, 1, 2, 3, 4, 5, 6, 9, 10];
 
         //Объединение ячеек
         $merge = ["B1:AH1",
@@ -229,157 +190,52 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("B3", JText::sprintf('COM_REPORTS_HEAD_SENT_OLD_WEEK'));
         $sheet->setCellValue("C3", JText::sprintf('COM_REPORTS_HEAD_SENT_CURRENT_WEEK'));
         $sheet->setCellValue("D3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //В проекте
-        $sheet->setCellValue("E2", JText::sprintf('COM_MKV_STATUS_IN_PROJECT'));
-        $sheet->setCellValue("E3", $date_1);
-        $sheet->setCellValue("F3", $date_2);
-        $sheet->setCellValue("G3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Отказ
-        $sheet->setCellValue("H2", $statuses[0]);
-        $sheet->setCellValue("H3", $date_1);
-        $sheet->setCellValue("I3", $date_2);
-        $sheet->setCellValue("J3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Договор
-        $sheet->setCellValue("K2", $statuses[1]);
-        $sheet->setCellValue("K3", $date_1);
-        $sheet->setCellValue("L3", $date_2);
-        $sheet->setCellValue("M3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Приглашение
-        $sheet->setCellValue("N2", $statuses[2]);
-        $sheet->setCellValue("N3", $date_1);
-        $sheet->setCellValue("O3", $date_2);
-        $sheet->setCellValue("P3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Планируют
-        $sheet->setCellValue("Q2", $statuses[3]);
-        $sheet->setCellValue("Q3", $date_1);
-        $sheet->setCellValue("R3", $date_2);
-        $sheet->setCellValue("S3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Заявка
-        $sheet->setCellValue("T2", $statuses[4]);
-        $sheet->setCellValue("T3", $date_1);
-        $sheet->setCellValue("U3", $date_2);
-        $sheet->setCellValue("V3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Соэкспонент
-        $sheet->setCellValue("W2", $statuses[5]);
-        $sheet->setCellValue("W3", $date_1);
-        $sheet->setCellValue("X3", $date_2);
-        $sheet->setCellValue("Y3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Соэкспонент без оплаты
-        $sheet->setCellValue("Z2", $statuses[6]);
-        $sheet->setCellValue("Z3", $date_1);
-        $sheet->setCellValue("AA3", $date_2);
-        $sheet->setCellValue("AB3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Некоммерческий
-        $sheet->setCellValue("AC2", $statuses[9]);
-        $sheet->setCellValue("AC3", $date_1);
-        $sheet->setCellValue("AD3", $date_2);
-        $sheet->setCellValue("AE3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-        //Счёт
-        $sheet->setCellValue("AF2", $statuses[10]);
-        $sheet->setCellValue("AF3", $date_1);
-        $sheet->setCellValue("AG3", $date_2);
-        $sheet->setCellValue("AH3", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
-
-        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_STATUSES_DYNAMIC'));
+        //Статусы
+        $column = 4;
+        foreach ($status_codes as $code) {
+            $status_title = ($code !== -1) ? $statuses[$code] : JText::sprintf('COM_MKV_STATUS_IN_PROJECT');
+            $sheet->setCellValueByColumnAndRow($column, 2, $status_title);
+            foreach ([$date_1, $date_2, JText::sprintf('COM_REPORTS_HEAD_DYNAMIC')] as $date) {
+                $sheet->setCellValueByColumnAndRow($column, 3, $date);
+                $column++;
+            }
+        }
 
         //Данные
+        $periods = ['week', 'current', 'dynamic'];
         $row = 4; //Строка, с которой начнаются данные
-        foreach ($items['items'] as $managerID => $item) {
-            if ((int) $item['today'] === 0 && (int) $item['week'] === 0) continue;
-            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
-            //Итого
-            $sheet->setCellValue("B{$row}", $item['week'] ?? 0);
-            $sheet->setCellValue("C{$row}", $item['today'] ?? 0);
-            $sheet->setCellValue("D{$row}", $item['dynamic'] ?? 0);
-            //В проекте
-            $sheet->setCellValue("E{$row}", $items['week'][$managerID][-1] ?? 0);
-            $sheet->setCellValue("F{$row}", $items['statuses'][$managerID][-1] ?? 0);
-            $sheet->setCellValue("G{$row}", $items['dynamic'][$managerID][-1] ?? 0);
-            //Отказ
-            $sheet->setCellValue("H{$row}", $items['week'][$managerID][0] ?? 0);
-            $sheet->setCellValue("I{$row}", $items['statuses'][$managerID][0] ?? 0);
-            $sheet->setCellValue("J{$row}", $items['dynamic'][$managerID][0] ?? 0);
-            //Договор
-            $sheet->setCellValue("K{$row}", $items['week'][$managerID][1] ?? 0);
-            $sheet->setCellValue("L{$row}", $items['statuses'][$managerID][1] ?? 0);
-            $sheet->setCellValue("M{$row}", $items['dynamic'][$managerID][1] ?? 0);
-            //Приглашение
-            $sheet->setCellValue("N{$row}", $items['week'][$managerID][2] ?? 0);
-            $sheet->setCellValue("O{$row}", $items['statuses'][$managerID][2] ?? 0);
-            $sheet->setCellValue("P{$row}", $items['dynamic'][$managerID][2] ?? 0);
-            //Планируют
-            $sheet->setCellValue("Q{$row}", $items['week'][$managerID][3] ?? 0);
-            $sheet->setCellValue("R{$row}", $items['statuses'][$managerID][3] ?? 0);
-            $sheet->setCellValue("S{$row}", $items['dynamic'][$managerID][3] ?? 0);
-            //Заявка
-            $sheet->setCellValue("T{$row}", $items['week'][$managerID][4] ?? 0);
-            $sheet->setCellValue("U{$row}", $items['statuses'][$managerID][4] ?? 0);
-            $sheet->setCellValue("V{$row}", $items['dynamic'][$managerID][4] ?? 0);
-            //Соэкспонент
-            $sheet->setCellValue("W{$row}", $items['week'][$managerID][5] ?? 0);
-            $sheet->setCellValue("X{$row}", $items['statuses'][$managerID][5] ?? 0);
-            $sheet->setCellValue("Y{$row}", $items['dynamic'][$managerID][5] ?? 0);
-            //Соэкспонент без оплаты
-            $sheet->setCellValue("Z{$row}", $items['week'][$managerID][6] ?? 0);
-            $sheet->setCellValue("AA{$row}", $items['statuses'][$managerID][6] ?? 0);
-            $sheet->setCellValue("AB{$row}", $items['dynamic'][$managerID][6] ?? 0);
-            //Некоммерческий
-            $sheet->setCellValue("AC{$row}", $items['week'][$managerID][9] ?? 0);
-            $sheet->setCellValue("AD{$row}", $items['statuses'][$managerID][9] ?? 0);
-            $sheet->setCellValue("AE{$row}", $items['dynamic'][$managerID][9] ?? 0);
-            //Счёт
-            $sheet->setCellValue("AF{$row}", $items['week'][$managerID][10] ?? 0);
-            $sheet->setCellValue("AG{$row}", $items['statuses'][$managerID][10] ?? 0);
-            $sheet->setCellValue("AH{$row}", $items['dynamic'][$managerID][10] ?? 0);
-
+        foreach ($items['statuses']['managers'] as $managerID => $manager) {
+            $sheet->setCellValue("A{$row}", $manager);
+            //Итого (по менеджерам)
+            $column = 1;
+            foreach ($periods as $period) {
+                $sheet->setCellValueByColumnAndRow($column, $row, $items['statuses']['total']['manager'][$managerID][$period]);
+                $column++;
+            }
+            //Значения по статусам
+            foreach ($status_codes as $status) {
+                foreach ($periods as $period) {
+                    $sheet->setCellValueByColumnAndRow($column, $row, $items['statuses']['statuses'][$managerID][$status][$period]);
+                    $column++;
+                }
+            }
             $row++;
         }
-        //Итого
+        //Итого (последняя строка)
         $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        //Итого
-        $sheet->setCellValue("B{$row}", $items['total']['week'] ?? 0);
-        $sheet->setCellValue("C{$row}", $items['total']['today'] ?? 0);
-        $sheet->setCellValue("D{$row}", $items['total']['dynamic'] ?? 0);
-        //В проекте
-        $sheet->setCellValue("E{$row}", $items['total']['statuses_week'][-1] ?? 0);
-        $sheet->setCellValue("F{$row}", $items['total']['statuses'][-1] ?? 0);
-        $sheet->setCellValue("G{$row}", $items['total']['dynamic_by_statuses'][-1] ?? 0);
-        //Отказ
-        $sheet->setCellValue("H{$row}", $items['total']['statuses_week'][0] ?? 0);
-        $sheet->setCellValue("I{$row}", $items['total']['statuses'][0] ?? 0);
-        $sheet->setCellValue("J{$row}", $items['total']['dynamic_by_statuses'][0] ?? 0);
-        //Договор
-        $sheet->setCellValue("K{$row}", $items['total']['statuses_week'][1] ?? 0);
-        $sheet->setCellValue("L{$row}", $items['total']['statuses'][1] ?? 0);
-        $sheet->setCellValue("M{$row}", $items['total']['dynamic_by_statuses'][1] ?? 0);
-        //Приглашение
-        $sheet->setCellValue("N{$row}", $items['total']['statuses_week'][2] ?? 0);
-        $sheet->setCellValue("O{$row}", $items['total']['statuses'][2] ?? 0);
-        $sheet->setCellValue("P{$row}", $items['total']['dynamic_by_statuses'][2] ?? 0);
-        //Планируют
-        $sheet->setCellValue("Q{$row}", $items['total']['statuses_week'][3] ?? 0);
-        $sheet->setCellValue("R{$row}", $items['total']['statuses'][3] ?? 0);
-        $sheet->setCellValue("S{$row}", $items['total']['dynamic_by_statuses'][3] ?? 0);
-        //Заявка
-        $sheet->setCellValue("T{$row}", $items['total']['statuses_week'][4] ?? 0);
-        $sheet->setCellValue("U{$row}", $items['total']['statuses'][4] ?? 0);
-        $sheet->setCellValue("V{$row}", $items['total']['dynamic_by_statuses'][4] ?? 0);
-        //Соэкспонент
-        $sheet->setCellValue("W{$row}", $items['total']['statuses_week'][5] ?? 0);
-        $sheet->setCellValue("X{$row}", $items['total']['statuses'][5] ?? 0);
-        $sheet->setCellValue("Y{$row}", $items['total']['dynamic_by_statuses'][5] ?? 0);
-        //Соэкспонент без оплаты
-        $sheet->setCellValue("Z{$row}", $items['total']['statuses_week'][6] ?? 0);
-        $sheet->setCellValue("AA{$row}", $items['total']['statuses'][6] ?? 0);
-        $sheet->setCellValue("AB{$row}", $items['total']['dynamic_by_statuses'][6] ?? 0);
-        //Некоммерческий
-        $sheet->setCellValue("AC{$row}", $items['total']['statuses_week'][9] ?? 0);
-        $sheet->setCellValue("AD{$row}", $items['total']['statuses'][9] ?? 0);
-        $sheet->setCellValue("AE{$row}", $items['total']['dynamic_by_statuses'][9] ?? 0);
-        //Счёт
-        $sheet->setCellValue("AF{$row}", $items['total']['statuses_week'][10] ?? 0);
-        $sheet->setCellValue("AG{$row}", $items['total']['statuses'][10] ?? 0);
-        $sheet->setCellValue("AH{$row}", $items['total']['dynamic_by_statuses'][10] ?? 0);
+        $column = 1;
+        //Итого общее
+        foreach ($periods as $period) {
+            $sheet->setCellValueByColumnAndRow($column, $row, $items['statuses']['total']['super'][$period]);
+            $column++;
+        }
+        //Итого по статусам
+        foreach ($status_codes as $status) {
+            foreach ($periods as $period) {
+                $sheet->setCellValueByColumnAndRow($column, $row, $items['statuses']['total']['statuses'][$status][$period]);
+                $column++;
+            }
+        }
 
 
         //Платежи
@@ -419,9 +275,12 @@ class ReportsModelSentInvites extends ListModel
 
         //Данные
         $row = 4; //Строка, с которой начнаются данные
-        foreach ($items['items'] as $managerID => $item) {
+        foreach ($items['payments'] as $managerID => $item) {
             if ((int) $item['current'] === 0 && (int) $item['week'] === 0) continue;
-            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
+            if (is_numeric($managerID)) {
+                $sheet->setCellValue("A{$row}", MkvHelper::getLastAndFirstNames(JFactory::getUser($managerID)->name));
+            }
+            else continue;
             $sheet->setCellValue("B{$row}", $items['payments'][$managerID]['week']['rub'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $sheet->setCellValue("C{$row}", $items['payments'][$managerID]['week']['usd'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
             $sheet->setCellValue("D{$row}", $items['payments'][$managerID]['week']['eur'] ?? number_format(0, MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, ''));
@@ -473,7 +332,7 @@ class ReportsModelSentInvites extends ListModel
         $row = 3; //Строка, с которой начнаются данные
         foreach ($items['invites']['managers'] as $managerID => $item) {
             if ((int) $item['current'] === 0 && (int) $item['week'] === 0) continue;
-            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
+            $sheet->setCellValue("A{$row}", MkvHelper::getLastAndFirstNames(JFactory::getUser($managerID)->name));
             $sheet->setCellValue("B{$row}", $items['invites']['managers'][$managerID]['week'] ?? 0);
             $sheet->setCellValue("C{$row}", $items['invites']['managers'][$managerID]['current'] ?? 0);
             $sheet->setCellValue("D{$row}", $items['invites']['managers'][$managerID]['dynamic'] ?? 0);
@@ -626,7 +485,7 @@ class ReportsModelSentInvites extends ListModel
         //Данные
         $row = 4; //Строка, с которой начнаются данные
         foreach ($items['squares']['managers'] as $managerID => $item) {
-            $sheet->setCellValue("A{$row}", $items['managers'][$managerID]);
+            $sheet->setCellValue("A{$row}", MkvHelper::getLastAndFirstNames(JFactory::getUser($managerID)->name));
             //Итого
             $sheet->setCellValue("B{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['amount'] ?? 0);
             $sheet->setCellValue("C{$row}", $items['squares']['total_by_manager'][$managerID]['week']['rub']['square'] ?? 0);
