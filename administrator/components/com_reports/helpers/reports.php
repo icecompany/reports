@@ -26,6 +26,7 @@ class ReportsHelper
     {
         $heads['companies'] = [
             'company' => 'COM_MKV_HEAD_COMPANY',
+            'form' => 'COM_REPORTS_HEAD_FORM_COMPANY',
             'company_full' => 'COM_REPORTS_HEAD_COMPANY_TITLE_FULL',
             'stands' => 'COM_MKV_HEAD_STANDS',
             'manager' => 'COM_MKV_HEAD_MANAGER',

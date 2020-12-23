@@ -40,6 +40,9 @@ class ReportsModelCompanies extends ListModel
 
         $fields = $this->getState('filter.fields');
         if (!empty($fields) && is_array($fields)) {
+            if (in_array('form', $fields)) {
+                $query->select("e.form as form");
+            }
             if (in_array('company_full', $fields)) {
                 $query->select("e.title_full as company_full");
             }
@@ -158,6 +161,7 @@ class ReportsModelCompanies extends ListModel
                 if (array_search($item->companyID, $companyIDs) === false) $companyIDs[] = $item->companyID;
                 $result['items'][$item->contractID] = [];
                 $result['items'][$item->contractID]['company'] = $item->company;
+                $result['items'][$item->contractID]['form'] = $item->form;
                 $result['items'][$item->contractID]['companyID'] = $item->companyID;
                 if (!empty($fields) && is_array($fields)) {
                     if (in_array('company_full', $fields)) {
