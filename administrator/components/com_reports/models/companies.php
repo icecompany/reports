@@ -242,8 +242,9 @@ class ReportsModelCompanies extends ListModel
             foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['contacts'] = $contacts[$item['companyID']];
         } else unset($this->heads['contacts']);
         if (in_array('active_contacts', $fields)) {
-            $contacts = $this->getContacts($companyIDs ?? [], $active = true);
-            foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['active_contacts'] = $contacts[$item['companyID']];
+            $contacts = $this->getContacts($companyIDs ?? [], true);
+            $contacts_all = $this->getContacts($companyIDs ?? [], false, true);
+            foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['active_contacts'] = $contacts[$item['companyID']] ?? $contacts_all[$item['companyID']];
         } else unset($this->heads['active_contacts']);
         if (in_array('thematics', $fields)) {
             $thematics = $this->getThematics(array_keys($result['items'] ?? []));
@@ -400,11 +401,21 @@ class ReportsModelCompanies extends ListModel
         return $result;
     }
 
-    private function getContacts(array $companyIDs = [], $active = false): array
+    /**
+     * Возвращает список контактных лиц компаний
+     * @param array $companyIDs массив с ID компаний
+     * @param false $only_main вернуть только главных контактных лиц
+     * @param false $one вернуть только одно контактное лицо
+     *
+     * @return array
+     *
+     * @since version 1.2.17
+     */
+    private function getContacts(array $companyIDs = [], $only_main = false, $one = false): array
     {
         if (empty($companyIDs)) return [];
         JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_companies/models");
-        $model = JModelLegacy::getInstance('Contacts', 'CompaniesModel', ['companyIDs' => $companyIDs, 'active' => $active, 'ignore_request' => true]);
+        $model = JModelLegacy::getInstance('Contacts', 'CompaniesModel', ['companyIDs' => $companyIDs, 'active' => $only_main, 'ignore_request' => true]);
         $contacts = $model->getItems();
         $result = [];
         foreach ($contacts as $contact) {
@@ -414,7 +425,7 @@ class ReportsModelCompanies extends ListModel
             if (!empty($contact['phone_work'])) $arr[] = $contact['phone_work'];
             if (!empty($contact['phone_mobile'])) $arr[] = $contact['phone_mobile'];
             if (!empty($contact['email'])) $arr[] = $contact['email'];
-            $result[$contact['companyID']][] = implode(', ', $arr);
+            if (($one && !isset($result[$contact['companyID']])) || !$one) $result[$contact['companyID']][] = implode(', ', $arr);
         }
         foreach (array_keys($result) as $companyID) $result[$companyID] = implode('; ', $result[$companyID]);
         return $result;
