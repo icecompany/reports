@@ -105,6 +105,12 @@ class ReportsModelCompanies extends ListModel
                 $query
                     ->select("c.dat as contract_date");
             }
+            if (in_array('invite_date', $fields) || in_array('invite_outgoing_number', $fields) || in_array('invite_incoming_number', $fields)) {
+                $query->leftJoin("#__mkv_contract_sent_info si on si.contractID = c.id");
+                if (in_array('invite_date', $fields)) $query->select("si.invite_date as invite_date");
+                if (in_array('invite_outgoing_number', $fields)) $query->select("si.invite_outgoing_number as invite_outgoing_number");
+                if (in_array('invite_incoming_number', $fields)) $query->select("si.invite_incoming_number as invite_incoming_number");
+            }
         }
 
         $project = PrjHelper::getActiveProject();
@@ -212,9 +218,18 @@ class ReportsModelCompanies extends ListModel
                     if (in_array('contract_number', $fields)) {
                         $result['items'][$item->contractID]['contract_number'] = $item->contract_number;
                     } else unset($this->heads['contract_number']);
+                    if (in_array('invite_incoming_number', $fields)) {
+                        $result['items'][$item->contractID]['invite_incoming_number'] = $item->invite_incoming_number;
+                    } else unset($this->heads['invite_incoming_number']);
+                    if (in_array('invite_outgoing_number', $fields)) {
+                        $result['items'][$item->contractID]['invite_outgoing_number'] = $item->invite_outgoing_number;
+                    } else unset($this->heads['invite_outgoing_number']);
                     if (in_array('contract_date', $fields)) {
                         $result['items'][$item->contractID]['contract_date'] = (!empty($item->contract_date)) ? JDate::getInstance($item->contract_date)->format("d.m.Y") : '';
                     } else unset($this->heads['contract_date']);
+                    if (in_array('invite_date', $fields)) {
+                        $result['items'][$item->contractID]['invite_date'] = (!empty($item->invite_date)) ? JDate::getInstance($item->invite_date)->format("d.m.Y") : '';
+                    } else unset($this->heads['invite_date']);
                 }
             }
         }
@@ -226,6 +241,10 @@ class ReportsModelCompanies extends ListModel
             $contacts = $this->getContacts($companyIDs ?? []);
             foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['contacts'] = $contacts[$item['companyID']];
         } else unset($this->heads['contacts']);
+        if (in_array('active_contacts', $fields)) {
+            $contacts = $this->getContacts($companyIDs ?? [], $active = true);
+            foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['active_contacts'] = $contacts[$item['companyID']];
+        } else unset($this->heads['active_contacts']);
         if (in_array('thematics', $fields)) {
             $thematics = $this->getThematics(array_keys($result['items'] ?? []));
             foreach ($result['items'] as $contractID => $item) $result['items'][$contractID]['thematics'] = $thematics[$contractID];
@@ -249,6 +268,7 @@ class ReportsModelCompanies extends ListModel
 
         //Заголовки
         $j = 0;
+        $sheet->setCellValueByColumnAndRow($j++, 1, "№");
         foreach ($this->heads as $item => $head) $sheet->setCellValueByColumnAndRow($j++, 1, JText::sprintf($head));
 
         $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_COMPANIES'));
@@ -257,6 +277,7 @@ class ReportsModelCompanies extends ListModel
         $row = 2; //Строка, с которой начнаются данные
         $col = 0;
         foreach ($items['items'] as $contractID => $item) {
+            $sheet->setCellValueExplicitByColumnAndRow($col++, $row, $row - 1, PHPExcel_Cell_DataType::TYPE_STRING);
             foreach ($this->heads as $elem => $head) {
                 $sheet->setCellValueExplicitByColumnAndRow($col++, $row, $item[$elem], PHPExcel_Cell_DataType::TYPE_STRING);
             }
@@ -379,11 +400,11 @@ class ReportsModelCompanies extends ListModel
         return $result;
     }
 
-    private function getContacts(array $companyIDs = []): array
+    private function getContacts(array $companyIDs = [], $active = false): array
     {
         if (empty($companyIDs)) return [];
         JModelLegacy::addIncludePath(JPATH_ADMINISTRATOR . "/components/com_companies/models");
-        $model = JModelLegacy::getInstance('Contacts', 'CompaniesModel', ['companyIDs' => $companyIDs, 'ignore_request' => true]);
+        $model = JModelLegacy::getInstance('Contacts', 'CompaniesModel', ['companyIDs' => $companyIDs, 'active' => $active, 'ignore_request' => true]);
         $contacts = $model->getItems();
         $result = [];
         foreach ($contacts as $contact) {

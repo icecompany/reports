@@ -43,10 +43,14 @@ class ReportsHelper
             'site' => 'COM_REPORTS_HEAD_SITE',
             'phones' => 'COM_REPORTS_HEAD_PHONES',
             'contacts' => 'COM_REPORTS_HEAD_CONTACTS',
+            'active_contacts' => 'COM_REPORTS_HEAD_CONTACTS_ACTIVE',
             'address_legal' => 'COM_REPORTS_HEAD_ADDRESS_LEGAL',
             'address_fact' => 'COM_REPORTS_HEAD_ADDRESS_FACT',
             'thematics' => 'COM_REPORTS_HEAD_THEMATICS',
             'activities' => 'COM_REPORTS_HEAD_COMPANY_ACTIVITIES',
+            'invite_date' => 'COM_REPORTS_HEAD_INVITE_SENT_DATE',
+            'invite_outgoing_number' => 'COM_REPORTS_HEAD_INVITE_SENT_NUMBER',
+            'invite_incoming_number' => 'COM_REPORTS_HEAD_INVITE_INCOMING_NUMBER',
         ];
         return $heads[$type];
 	}
