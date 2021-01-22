@@ -42,9 +42,6 @@ class ReportsModelSentInvites extends ListModel
     {
         $this->_db->setQuery("call s7vi9_mkv_save_managers_stat()")->execute();
 
-        $interval = $this->getState('filter.cron_interval');
-        //exit(var_dump($interval));
-
         $query = $this->_db->getQuery(true);
         $query
             ->select("u.name as manager")
@@ -733,6 +730,15 @@ class ReportsModelSentInvites extends ListModel
                 ->select("if(si.invite_date <= {$db->q($date_1)}, 'week' , 'dynamic') as {$db->qn('period')}")
                 ->where("c.projectID = {$project_2} and si.invite_date <= {$db->q($date_2)}")
                 ->group("c.managerID, c.projectID, period");
+        }
+
+        //Отсеиваем исключённых пользователей
+        $exception_group = ReportsHelper::getConfig('exception_users');
+        if (!empty($exception_group)) {
+            $not_users = implode(', ', MkvHelper::getGroupUsers($exception_group) ?? []);
+            if (!empty($not_users)) {
+                $query->where("c.managerID not in ({$not_users})");
+            }
         }
 
         $items = $db->setQuery($query)->loadAssocList();

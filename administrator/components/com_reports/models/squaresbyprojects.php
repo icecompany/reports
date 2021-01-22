@@ -38,7 +38,14 @@ class ReportsModelSquaresByProjects extends ListModel
 
         $this->setState('list.limit', 0);
 
-        //exit(var_dump($query->dump()));
+        //Отсеиваем исключённых пользователей
+        $exception_group = ReportsHelper::getConfig('exception_users');
+        if (!empty($exception_group)) {
+            $not_users = implode(', ', MkvHelper::getGroupUsers($exception_group) ?? []);
+            if (!empty($not_users)) {
+                $query->where("c.managerID not in ({$not_users})");
+            }
+        }
 
         return $query;
     }

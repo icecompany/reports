@@ -31,6 +31,15 @@ class ReportsModelSquaresByDates extends ListModel
             ->where("(pi.type = 'square' and c.dat is not null and c.projectID = {$this->_db->q($this->project)} and c.dat <= {$this->_db->q($this->date_2)})")
             ->group("c.managerID, period, pi.square_type, c.currency, period");
 
+        //Отсеиваем исключённых пользователей
+        $exception_group = ReportsHelper::getConfig('exception_users');
+        if (!empty($exception_group)) {
+            $not_users = implode(', ', MkvHelper::getGroupUsers($exception_group) ?? []);
+            if (!empty($not_users)) {
+                $query->where("c.managerID not in ({$not_users})");
+            }
+        }
+
         $this->setState('list.limit', 0);
 
         return $query;
