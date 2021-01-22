@@ -17,6 +17,7 @@ class ReportsModelSentInvites extends ListModel
             $config['filter_fields'] = array(
                 'manager, company',
                 'search',
+                'cron_interval',
                 'date_1', 'date_2',
                 'si.invite_date',
             );
@@ -34,11 +35,15 @@ class ReportsModelSentInvites extends ListModel
             'director_post' => 'COM_REPORTS_HEAD_INVITE_CONTACT_POST',
             'phone_1' => 'COM_REPORTS_HEAD_INVITE_CONTACT_PHONE',
         ];
+        $this->cron = $config['cron'] ?? false;
     }
 
     protected function _getListQuery()
     {
         $this->_db->setQuery("call s7vi9_mkv_save_managers_stat()")->execute();
+
+        $interval = $this->getState('filter.cron_interval');
+        //exit(var_dump($interval));
 
         $query = $this->_db->getQuery(true);
         $query
@@ -49,7 +54,7 @@ class ReportsModelSentInvites extends ListModel
             ->leftJoin("s7vi9_users u on ms.managerID = u.id")
             ->having("invites > 0");
 
-        $project = PrjHelper::getActiveProject();
+        $project = PrjHelper::getActiveProject(MkvHelper::getConfig('default_project'));
         $date_1 = $this->getState('filter.date_1');
         $date_2 = $this->getState('filter.date_2');
 
@@ -138,7 +143,7 @@ class ReportsModelSentInvites extends ListModel
             }
         }
 
-        $project = PrjHelper::getActiveProject();
+        $project = PrjHelper::getActiveProject(MkvHelper::getConfig('default_project'));
         $previous = PrjHelper::getPreviousProject($project);
 
         $result['statuses'] = $result_new;
@@ -149,7 +154,7 @@ class ReportsModelSentInvites extends ListModel
         return $result;
     }
 
-    public function export()
+    public function export($userID = 0, $title = '')
     {
         $items = $this->getItems();
         JLoader::discover('PHPExcel', JPATH_LIBRARIES);
@@ -616,15 +621,75 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("BB{$row}", $items['squares']['total']['rub'][8]['dynamic']['amount'] ?? 0);
         $sheet->setCellValue("BC{$row}", $items['squares']['total']['rub'][8]['dynamic']['square'] ?? 0);
 
-        header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
-        header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
-        header("Cache-Control: no-cache, must-revalidate");
-        header("Pragma: public");
-        header("Content-type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=SentInvites.xls");
+        if (!$this->cron) {
+            header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
+            header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
+            header("Cache-Control: no-cache, must-revalidate");
+            header("Pragma: public");
+            header("Content-type: application/vnd.ms-excel");
+            header("Content-Disposition: attachment; filename=SentInvites.xls");
+        }
         $objWriter = PHPExcel_IOFactory::createWriter($xls, 'Excel5');
-        $objWriter->save('php://output');
-        jexit();
+        $t = time();
+        $path_full = JPATH_SITE . "/cron/SentInvites_{$t}.xls";
+        $filename = "SentInvites_{$t}.xls";
+        $objWriter->save((!$this->cron) ? 'php://output' : $path_full);
+        if ($this->cron) {
+            jimport('joomla.mail.helper');
+            $mailer = JFactory::getMailer();
+            $user = JFactory::getUser($userID);
+            $mailer->addAttachment($path_full, $filename);
+            $mailer->isHtml(true);
+            $mailer->Encoding = 'base64';
+            $mailer->addRecipient($user->email, $user->name);
+            $mailer->setFrom("xakepok@xakepok.com", "MKV");
+            $mailer->setBody("Во вложении");
+            $mailer->setSubject("{$title} " . JFactory::getDate()->format("Y-m-d"));
+            $mailer->Send();
+            unlink($path_full);
+        }
+        if (!$this->cron) jexit();
+    }
+
+    public function saveReport() {
+        //Массив с состоянием фильтров
+        $preset = [];
+        $preset['cron_interval'] = $this->getFilterForm()->getValue('cron_interval', 'filter');
+        if (!in_array($preset['cron_interval'], ['week', 'year'])) {
+            $message = JText::sprintf('COM_REPORTS_MSG_SELECT_INTERVAL');
+            $type = 'warning';
+            $uri = JUri::getInstance($_SERVER['HTTP_REFERER']);
+            JFactory::getApplication()->enqueueMessage($message, $type);
+            JFactory::getApplication()->redirect($uri->toString());
+        }
+
+        $userID = JFactory::getUser()->id;
+
+        //Массив для вставки в базу
+        $data = [];
+        $data['params'] = json_encode($preset);
+        $data['managerID'] = $userID;
+        $data['type'] = 'sentInvites';
+
+        //Проверка уже существующих отчётов на наличие такого же
+        $table = parent::getTable('Reports', 'TableReports');
+        $table->load($data);
+        if ($table->id !== null) {
+            $message = JText::sprintf('COM_REPORTS_MSG_REPORT_ALREADY_EXISTS', $table->title);
+            $type = 'warning';
+        }
+        else {
+            $table->save($data);
+            $data['id'] = $table->id;
+            $data['title'] = JText::sprintf('COM_REPORTS_NEW_REPORT_TITLE', $table->id);
+            $data['type_show'] = JText::sprintf('COM_REPORTS_FORM_REPORT_TYPE_SENTINVITES');
+            $table->save($data);
+            $message = JText::sprintf('COM_REPORTS_MSG_REPORT_SAVE', $table->id);
+            $type = 'message';
+        }
+        $uri = JUri::getInstance($_SERVER['HTTP_REFERER']);
+        JFactory::getApplication()->enqueueMessage($message, $type);
+        JFactory::getApplication()->redirect($uri->toString());
     }
 
     private function getSquares(int $project_1, int $project_2)
@@ -763,6 +828,8 @@ class ReportsModelSentInvites extends ListModel
         $this->setState('filter.date_1', $date_1);
         $date_2 = $this->getUserStateFromRequest($this->context . '.filter.date_2', 'filter_date_2', JDate::getInstance()->format("Y-m-d"), 'string', false);
         $this->setState('filter.date_2', $date_2);
+        $cron_interval = $this->getUserStateFromRequest($this->context . '.filter.cron_interval', 'filter_cron_interval');
+        $this->setState('filter.cron_interval', $cron_interval);
         ReportsHelper::check_refresh();
     }
 
@@ -771,8 +838,9 @@ class ReportsModelSentInvites extends ListModel
         $id .= ':' . $this->getState('filter.search');
         $id .= ':' . $this->getState('filter.date_1');
         $id .= ':' . $this->getState('filter.date_2');
+        $id .= ':' . $this->getState('filter.cron_interval');
         return parent::getStoreId($id);
     }
 
-    private $heads;
+    private $heads, $cron;
 }

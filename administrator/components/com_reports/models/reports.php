@@ -82,6 +82,7 @@ class ReportsModelReports extends ListModel
             $arr['title'] = $item->title;
             $arr['manager'] = $item->manager;
             $arr['type_show'] = $item->type_show;
+            $type = mb_strtoupper($item->type);
             $arr['type'] = $item->type;
             $arr['params'] = $item->params;
             $arr['managerID'] = $item->managerID;

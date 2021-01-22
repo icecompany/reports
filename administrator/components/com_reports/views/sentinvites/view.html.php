@@ -18,6 +18,7 @@ class ReportsViewSentInvites extends HtmlView
 
         $this->filterForm->setValue('date_1', 'filter', $this->state->get('filter.date_1'));
         $this->filterForm->setValue('date_2', 'filter', $this->state->get('filter.date_2'));
+        $this->filterForm->setValue('cron_interval', 'filter', $this->state->get('filter.cron_interval'));
 
         // Show the toolbar
         $this->toolbar();
@@ -34,6 +35,7 @@ class ReportsViewSentInvites extends HtmlView
     {
         JToolBarHelper::title(JText::sprintf('COM_REPORTS_MENU_SENT_INVITES'), 'signup');
         JToolbarHelper::custom('sentInvites.download', 'download', 'download', JText::sprintf('COM_MKV_BUTTON_EXPORT_TO_EXCEL'), false);
+        JToolbarHelper::custom('sentInvites.save_report', 'plus', 'plus', JText::sprintf('COM_REPORTS_BUTTON_SAVE_REPORT'), false);
         if (ReportsHelper::canDo('core.admin'))
         {
             JToolBarHelper::preferences('com_reports');

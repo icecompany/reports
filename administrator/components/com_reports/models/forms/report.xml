@@ -20,6 +20,7 @@
                 class="span12"
         >
             <option value="companies">COM_REPORTS_FORM_REPORT_TYPE_COMPANIES</option>
+            <option value="sentInvites">COM_REPORTS_FORM_REPORT_TYPE_SENTINVITES</option>
         </field>
         <field
                 name="id"

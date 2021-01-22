@@ -11,20 +11,24 @@ class ReportsControllerCron extends BaseController
         $reports = $this->getReports();
         foreach ($reports as $report) {
             $name = ucfirst($report['type']);
+            $model = $this->getModel($name, 'ReportsModel', ['cron' => true]);
+            $params = json_decode($report['params'], true);
             if ($name === 'Companies') {
-                $model = $this->getModel($name, 'ReportsModel', ['cron' => true]);
-                $params = json_decode($report['params'], true);
                 if ($params['manager'] !== null) $model->setState('filter.manager', $params['manager']);
                 if ($params['item'] !== null && !empty($params['item'])) $model->setState('filter.item', $params['item']);
                 if ($params['status'] !== null && !empty($params['status'])) $model->setState('filter.status', $params['status']);
                 if ($params['fields'] !== null && !empty($params['fields'])) $model->setState('filter.fields', $params['fields']);
-                $model->export($report['managerID'], $report['title']);
-                $notify = [];
-                $notify['managerID'] = $report['managerID'];
-                $notify['contractID'] = NULL;
-                $notify['text'] = JText::sprintf('COM_REPORTS_MSG_REPORT_HAS_SENT', $report['title'], JFactory::getUser($report['managerID'])->email);
-                SchedulerHelper::sendNotify($notify);
             }
+            if ($name === 'entinvites') {
+                $model->setState('filter.date_1', JDate::getInstance("-1 {$params['cron_interval']}")->format("Y-m-d"));
+                $model->setState('filter.date_2', JDate::getInstance("+3 hour")->format("Y-m-d"));
+            }
+            $model->export($report['managerID'], $report['title']);
+            $notify = [];
+            $notify['managerID'] = $report['managerID'];
+            $notify['contractID'] = NULL;
+            $notify['text'] = JText::sprintf('COM_REPORTS_MSG_REPORT_HAS_SENT', $report['title'], JFactory::getUser($report['managerID'])->email);
+            SchedulerHelper::sendNotify($notify);
         }
 
         die(date('Y-m-d H:i:s') . ': Success');

@@ -24,6 +24,16 @@
                 filter="none"
                 format="%d.%m.%Y"
         />
+        <field
+                name="cron_interval"
+                type="list"
+                default=""
+                onchange="this.form.submit();"
+                >
+            <option value="">COM_REPORTS_FILTER_INTERVAL_FOR_CRON</option>
+            <option value="week">COM_REPORTS_FILTER_INTERVAL_WEEK</option>
+            <option value="year">COM_REPORTS_FILTER_INTERVAL_YEAR</option>
+        </field>
     </fields>
     <fields name="list">
         <field

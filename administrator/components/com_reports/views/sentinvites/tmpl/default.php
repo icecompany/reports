@@ -16,6 +16,10 @@ HTMLHelper::_('script', 'com_reports/script.js', array('version' => 'auto', 'rel
             location.href = 'index.php?option=com_reports&task=sent.execute&format=xls';
             return false;
         }
+        if (task === 'sentInvites.save_report') {
+            location.href = 'index.php?option=com_reports&task=sent.save_report';
+            return false;
+        }
         else Joomla.submitform(task, form);
     };
 </script>
