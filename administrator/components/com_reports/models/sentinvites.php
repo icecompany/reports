@@ -796,8 +796,8 @@ class ReportsModelSentInvites extends ListModel
                     $items[$managerID]['dynamic'][$currency] = number_format((float) ($items[$managerID][$project_2][$currency] - $items[$managerID][$project_1][$currency]), MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
                     $items[$managerID]['week'][$currency] = number_format($items[$managerID][$project_1][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
                     $items[$managerID]['current'][$currency] = number_format($items[$managerID][$project_2][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
-                    unset($items[$managerID][$project_1], $items[$managerID][$project_2]);
                 }
+                unset($items[$managerID][$project_1], $items[$managerID][$project_2]);
             }
         }
         else {
@@ -817,6 +817,7 @@ class ReportsModelSentInvites extends ListModel
                 $items['total'][$period][$currency] = number_format((float) $total[$period][$currency], MKV_FORMAT_DEC_COUNT, MKV_FORMAT_SEPARATOR_FRACTION, '');
             }
         }
+
         return $items;
     }
 
