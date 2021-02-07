@@ -758,7 +758,12 @@ class ReportsModelSentInvites extends ListModel
         }
         foreach ($result['managers'] as $managerID => $invites) {
             $result['managers'][$managerID]['dynamic'] = (int) ($result['managers'][$managerID]['current'] - $result['managers'][$managerID]['week']);
-            foreach (['dynamic', 'current', 'week'] as $period) $result['total'][$period] += $result['managers'][$managerID][$period];
+            if ((int) $diff->days > 350) {
+                $result['total']['dynamic'] = $result['total']['current'] - $result['total']['week'];
+            }
+            else {
+                foreach (['dynamic', 'current', 'week'] as $period) $result['total'][$period] += $result['managers'][$managerID][$period];
+            }
         }
 
         return $result;
