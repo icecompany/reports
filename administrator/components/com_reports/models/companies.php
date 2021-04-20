@@ -20,6 +20,7 @@ class ReportsModelCompanies extends ListModel
                 'fields',
                 'status',
                 'item',
+                'distinct',
             );
         }
         $format = JFactory::getApplication()->input->getString('format', 'html');
@@ -33,7 +34,7 @@ class ReportsModelCompanies extends ListModel
     {
         $query = $this->_db->getQuery(true);
         $query
-            ->select("e.title as company, c.id as contractID, c.companyID")
+            ->select("c.id as contractID, c.companyID, e.title as company")
             ->from("#__mkv_contracts c")
             ->leftJoin("#__mkv_contract_incoming_info cii on cii.contractID = c.id")
             ->leftJoin("#__mkv_companies e on e.id = c.companyID");
@@ -144,6 +145,7 @@ class ReportsModelCompanies extends ListModel
                 ->leftJoin("#__mkv_contract_items ci on ci.contractID = c.id")
                 ->where("(ci.itemID in ({$item_ids}) and ci.value > 0)");
         }
+
         $limit = (!$this->export) ? $this->getState('list.limit') : 0;
         $this->setState('list.limit', $limit);
 
@@ -161,8 +163,13 @@ class ReportsModelCompanies extends ListModel
         $result = ['items' => []];
         $items = parent::getItems();
         $companyIDs = [];
+        $ids = [];
 
         foreach ($items as $item) {
+            if (is_numeric($this->state->get('filter.distinct')) && $this->state->get('filter.distinct') == '1' && array_search($item->companyID, $ids) !== false) {
+                continue;
+            }
+            $ids[] = $item->companyID;
             if (!isset($result['items'][$item->contractID])) {
                 if (array_search($item->companyID, $companyIDs) === false) $companyIDs[] = $item->companyID;
                 $result['items'][$item->contractID] = [];
@@ -445,6 +452,8 @@ class ReportsModelCompanies extends ListModel
             $this->setState('filter.fields', $fields);
             $item = $this->getUserStateFromRequest($this->context . '.filter.item', 'filter_item');
             $this->setState('filter.item', $item);
+            $distinct = $this->getUserStateFromRequest($this->context . '.filter.distinct', 'filter_distinct');
+            $this->setState('filter.distinct', $distinct);
         }
         parent::populateState($ordering, $direction);
         ReportsHelper::check_refresh();
@@ -457,6 +466,7 @@ class ReportsModelCompanies extends ListModel
         $id .= ':' . $this->getState('filter.status');
         $id .= ':' . $this->getState('filter.fields');
         $id .= ':' . $this->getState('filter.item');
+        $id .= ':' . $this->getState('filter.distinct');
         return parent::getStoreId($id);
     }
 

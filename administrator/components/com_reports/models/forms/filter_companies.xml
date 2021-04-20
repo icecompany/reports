@@ -39,6 +39,14 @@
                 default="[]"
                 onchange="this.form.submit();"
         />
+        <field
+                name="distinct"
+                type="list"
+                onchange="this.form.submit();"
+        >
+            <option value="">COM_REPORTS_FILTER_DISTINCT</option>
+            <option value="1">JYES</option>
+        </field>
     </fields>
     <fields name="list">
         <field
