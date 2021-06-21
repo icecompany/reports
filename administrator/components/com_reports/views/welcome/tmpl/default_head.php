@@ -12,7 +12,6 @@ $listDirn    = $this->escape($this->state->get('list.direction'));
     <th><?php echo JText::sprintf('COM_REPORTS_HEAD_SITE');?></th>
     <th><?php echo JText::sprintf('COM_REPORTS_HEAD_CONTACTS');?></th>
     <th><?php echo JText::sprintf('COM_REPORTS_HEAD_WELCOME_CALCULATE');?></th>
-    <?php foreach ($this->items['price'] as $itemID => $item_title) :?>
-        <th><?php echo $item_title;?></th>
-    <?php endforeach; ?>
+    <th><?php echo JText::sprintf('COM_REPORTS_HEAD_WELCOME_PRINT');?></th>
+    <th><?php echo JText::sprintf('COM_REPORTS_HEAD_WELCOME_ELECTRON');?></th>
 </tr>

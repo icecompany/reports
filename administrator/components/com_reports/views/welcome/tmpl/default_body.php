@@ -12,11 +12,8 @@ $ii = $this->state->get('list.start', 0);
         <td><?php echo $company['site_link'];?></td>
         <td><?php echo $this->items['contacts'][$companyID];?></td>
         <td><?php echo $company['calculate'] ?? 0;?></td>
-        <?php foreach ($this->items['price'] as $itemID => $item_title) :?>
-            <td>
-                <?php echo $this->items['items'][$companyID]['price'][$itemID] ?? 0;?>
-            </td>
-        <?php endforeach; ?>
+        <td><?php echo $company['print'] ?? 0;?></td>
+        <td><?php echo $company['electron'] ?? 0;?></td>
     </tr>
 <?php endforeach;?>
 

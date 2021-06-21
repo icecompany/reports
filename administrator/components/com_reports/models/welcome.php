@@ -32,13 +32,14 @@ class ReportsModelWelcome extends ListModel
             ->select("ci.itemID, ci.value")
             ->select("i.title as item, i.square_type, i.type")
             ->select("c.id as contractID")
+            ->select("if(i.type != 'welcome', 0, 1) as is_welcome")
             ->from("#__mkv_contract_items ci")
             ->leftJoin("#__mkv_price_items i on i.id = ci.itemID")
             ->leftJoin("#__mkv_price_sections ps on ps.id = i.sectionID")
             ->leftJoin("#__mkv_contracts c on c.id = ci.contractID")
             ->leftJoin("#__mkv_companies e on e.id = c.companyID")
             ->leftJoin("#__users u on u.id = c.managerID")
-            ->where("(i.square_type is not null or i.type like 'welcome')");
+            ->where("(i.square_type is not null or i.type = 'welcome')");
         $project = PrjHelper::getActiveProject();
         $search = $this->setState('filter.search');
         if (!empty($search)) {
@@ -57,7 +58,7 @@ class ReportsModelWelcome extends ListModel
 
     public function getItems()
     {
-        $result = ['items' => [], 'price' => [], 'stands' => [], 'total' => ['price' => [], 'calculate' => 0]];
+        $result = ['items' => [], 'price' => [], 'stands' => [], 'total' => ['price' => [], 'calculate' => 0, 'print' => 0, 'electron' => 0]];
         $items = parent::getItems();
         $ids = [];
 
@@ -71,6 +72,8 @@ class ReportsModelWelcome extends ListModel
                 $manager = explode(' ', $item->manager);
                 $result['items'][$item->companyID]['manager'] = $manager[0];
                 $result['items'][$item->companyID]['price'] = [];
+                $result['items'][$item->companyID]['print'] = 0;
+                $result['items'][$item->companyID]['electron'] = 0;
             }
             if (!isset($result['items'][$item->companyID]['price'][$item->itemID])) $result['items'][$item->companyID]['price'][$item->itemID] = 0;
             $result['items'][$item->companyID]['price'][$item->itemID] += $item->value;
@@ -95,9 +98,18 @@ class ReportsModelWelcome extends ListModel
                     }
                 }
             }
+            else {
+                if (!isset($result['total']['print'])) $result['total']['print'] = 0;
+                $result['items'][$item->companyID]['print'] = (float) $item->value;
+                $result['total']['print'] += (float) $item->value;
+            }
             if (!isset($result['total']['price'][$item->itemID])) $result['total']['price'][$item->itemID] = 0;
             $result['total']['price'][$item->itemID] += $item->value;
         }
+        foreach ($result['items'] as $companyID => $arr) {
+            $result['items'][$companyID]['electron'] = ($result['items'][$companyID]['calculate'] - $result['items'][$companyID]['print']) ?? 0;
+        }
+        $result['total']['electron'] = $result['total']['calculate'] - $result['total']['print'];
         $result['stands'] = $this->getStands($ids ?? []);
         $result['contacts'] = $this->getContacts(array_keys($result['items']) ?? []);
         return $result;
