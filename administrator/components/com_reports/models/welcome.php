@@ -126,10 +126,10 @@ class ReportsModelWelcome extends ListModel
         $sheet = $xls->getActiveSheet();
 
         $sheet->getStyle("A2")->getFont()->setBold(true);
-        $sheet->getStyle("F")->getFont()->setBold(true);
+        $sheet->getStyle("G")->getFont()->setBold(true);
 
         //Ширина столбцов
-        $width = ["A" => 60, "B" => 13, "C" => 13, "D" => 25, "E" => 40, "F" => 20];
+        $width = ["A" => 60, "B" => 13, "C" => 13, "D" => 25, "E" => 40, "F" => 20, "G" => 20, "H" => 20];
         foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
 
         $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_COMPANY'));
@@ -138,7 +138,9 @@ class ReportsModelWelcome extends ListModel
         $sheet->setCellValue("D1", JText::sprintf('COM_REPORTS_HEAD_SITE'));
         $sheet->setCellValue("E1", JText::sprintf('COM_REPORTS_HEAD_CONTACTS'));
         $sheet->setCellValue("F1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_CALCULATE'));
-        $col = 6;
+        $sheet->setCellValue("G1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_PRINT'));
+        $sheet->setCellValue("H1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_ELECTRON'));
+        $col = 8;
         foreach ($items['price'] as $id => $title) {
             $sheet->setCellValueByColumnAndRow($col, 1, $title);
             $col++;
@@ -148,9 +150,11 @@ class ReportsModelWelcome extends ListModel
         $sheet->mergeCells("A2:E2");
         $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
         $sheet->setCellValue("F2", $items['total']['calculate'] ?? 0);
+        $sheet->setCellValue("G2", $items['total']['print'] ?? 0);
+        $sheet->setCellValue("H2", $items['total']['electron'] ?? 0);
         $sheet->getStyle("A2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
 
-        $col = 6;
+        $col = 8;
         foreach ($items['price'] as $itemID => $title) {
             $sheet->setCellValueByColumnAndRow($col, 2, $items['total']['price'][$itemID] ?? 0);
             $col++;
@@ -160,7 +164,7 @@ class ReportsModelWelcome extends ListModel
 
         //Данные. Один проход цикла - одна строка
         $row = 3; //Строка, с которой начнаются данные
-        $col = 6;
+        $col = 8;
         foreach ($items['items'] as $companyID => $company) {
             $sheet->setCellValue("A{$row}", $company['company']);
             $sheet->setCellValue("B{$row}", $company['manager']);
@@ -168,12 +172,14 @@ class ReportsModelWelcome extends ListModel
             $sheet->setCellValue("D{$row}", $company['site']);
             $sheet->setCellValue("E{$row}", $items['contacts'][$companyID]);
             $sheet->setCellValue("F{$row}", $company['calculate'] ?? 0);
+            $sheet->setCellValue("G{$row}", $company['print'] ?? 0);
+            $sheet->setCellValue("H{$row}", $company['electron'] ?? 0);
             foreach ($items['price'] as $itemID => $title) {
                 $sheet->setCellValueByColumnAndRow($col, $row, $items['items'][$companyID]['price'][$itemID] ?? 0);
                 $col++;
             }
             $row++;
-            $col = 6;
+            $col = 8;
         }
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
