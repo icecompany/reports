@@ -141,62 +141,36 @@ class ReportsModelP1 extends ListModel
         $xls->setActiveSheetIndex(0);
         $sheet = $xls->getActiveSheet();
 
-        $sheet->getStyle("A2")->getFont()->setBold(true);
-        $sheet->getStyle("G")->getFont()->setBold(true);
-
-        //Ширина столбцов
-        $width = ["A" => 60, "B" => 13, "C" => 13, "D" => 25, "E" => 40, "F" => 20, "G" => 20, "H" => 20];
-        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
-
-        $sheet->setCellValue("A1", JText::sprintf('COM_REPORTS_HEAD_COMPANY'));
-        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_MANAGER'));
-        $sheet->setCellValue("C1", JText::sprintf('COM_REPORTS_HEAD_STANDS'));
-        $sheet->setCellValue("D1", JText::sprintf('COM_REPORTS_HEAD_SITE'));
-        $sheet->setCellValue("E1", JText::sprintf('COM_REPORTS_HEAD_CONTACTS'));
-        $sheet->setCellValue("F1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_CALCULATE'));
-        $sheet->setCellValue("G1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_PRINT'));
-        $sheet->setCellValue("H1", JText::sprintf('COM_REPORTS_HEAD_WELCOME_ELECTRON'));
-        $col = 8;
-        foreach ($items['price'] as $id => $title) {
-            $sheet->setCellValueByColumnAndRow($col, 1, $title);
-            $col++;
+        //Заголовки
+        $cell = 1;
+        $row = 1;
+        $sheet
+            ->setCellValueByColumnAndRow(0, $row, "№п/п")
+            ->getStyleByColumnAndRow(0, $row)->getFont()->setBold(true);
+        foreach ($this->heads as $field => $params) {
+            $sheet
+                ->setCellValueByColumnAndRow($cell, $row, JText::sprintf($params['text']))
+                ->getStyleByColumnAndRow($cell, $row)->getFont()->setBold(true);
+            $cell++;
         }
-
-        //Итого
-        $sheet->mergeCells("A2:E2");
-        $sheet->setCellValue("A2", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
-        $sheet->setCellValue("F2", $items['total']['calculate'] ?? 0);
-        $sheet->setCellValue("G2", $items['total']['print'] ?? 0);
-        $sheet->setCellValue("H2", $items['total']['electron'] ?? 0);
-        $sheet->getStyle("A2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-
-        $col = 8;
-        foreach ($items['price'] as $itemID => $title) {
-            $sheet->setCellValueByColumnAndRow($col, 2, $items['total']['price'][$itemID] ?? 0);
-            $col++;
-        }
-
-        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_WELCOME'));
-
-        //Данные. Один проход цикла - одна строка
-        $row = 3; //Строка, с которой начнаются данные
-        $col = 8;
-        foreach ($items['items'] as $companyID => $company) {
-            $sheet->setCellValue("A{$row}", $company['company']);
-            $sheet->setCellValue("B{$row}", $company['manager']);
-            $sheet->setCellValueExplicit("C{$row}", $items['stands'][$companyID], PHPExcel_Cell_DataType::TYPE_STRING);
-            $sheet->setCellValue("D{$row}", $company['site']);
-            $sheet->setCellValue("E{$row}", $items['contacts'][$companyID]);
-            $sheet->setCellValue("F{$row}", $company['calculate'] ?? 0);
-            $sheet->setCellValue("G{$row}", $company['print'] ?? 0);
-            $sheet->setCellValue("H{$row}", $company['electron'] ?? 0);
-            foreach ($items['price'] as $itemID => $title) {
-                $sheet->setCellValueByColumnAndRow($col, $row, $items['items'][$companyID]['price'][$itemID] ?? 0);
-                $col++;
+        //Данные
+        $cell = 0;
+        $row = 2;
+        foreach ($items['items'] as $item) {
+            $sheet->setCellValueByColumnAndRow($cell, $row, $row - 1);
+            $cell++;
+            foreach ($this->heads as $field => $params) {
+                $sheet->setCellValueByColumnAndRow($cell, $row, $item[$field]);
+                $cell++;
             }
             $row++;
-            $col = 8;
+            $cell = 0;
         }
+        //Фильтр
+        $sheet->setAutoFilterByColumnAndRow(1, 1, count($this->heads), count($items['items']) + 1);
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_MENU_QUARTER_P1_SHORT'));
+
         header("Expires: Mon, 1 Apr 1974 05:00:00 GMT");
         header("Last-Modified: " . gmdate("D,d M YH:i:s") . " GMT");
         header("Cache-Control: no-cache, must-revalidate");
