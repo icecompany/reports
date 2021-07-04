@@ -98,7 +98,7 @@ class ReportsModelSentInvites extends ListModel
 
     public function getItems()
     {
-        $result = ['statuses' => [], 'squares' => [], 'invites' => [], 'payments' => []];
+        $result = ['statuses' => [], 'squares' => [], 'invites' => [], 'originals' => [], 'payments' => []];
         $items = parent::getItems();
         $statuses = [-1, 0, 1, 2, 3, 4, 5, 6, 9, 10];
         $periods = ['week', 'current', 'dynamic'];
@@ -107,6 +107,7 @@ class ReportsModelSentInvites extends ListModel
             'statuses' => [],
             'total' => [
                 'super' => ['week' => 0, 'current' => 0, 'dynamic' => 0], //Итоговая суммарная статистика
+                'originals' => ['week' => 0, 'current' => 0, 'dynamic' => 0], //Итоговая суммарная по оригиналам договоров
                 'manager' => [], //По менеджерам
                 'statuses' => [] //По статусам
             ]
@@ -123,6 +124,10 @@ class ReportsModelSentInvites extends ListModel
                         if (!isset($result_new['total']['statuses'][$status][$period])) $result_new['total']['statuses'][$status][$period] = 0;
                     }
                 }
+                foreach ($periods as $period) {
+                    if (!isset($result_new['originals'][$item->managerID][$period])) $result_new['originals'][$item->managerID][$period] = 0;
+                    if (!isset($result_new['total']['originals'][$period])) $result_new['total']['originals'][$period] = 0;
+                }
             }
             $day = ($item->dat !== $now) ? 'week' : 'current';
             foreach ($statuses as $status) {
@@ -138,6 +143,10 @@ class ReportsModelSentInvites extends ListModel
                 $result_new['total']['manager'][$item->managerID]['dynamic'] = (int) ($result_new['total']['manager'][$item->managerID]['current'] - $result_new['total']['manager'][$item->managerID]['week']);
                 $result_new['total']['statuses'][$status]['dynamic'] = (int) ($result_new['total']['statuses'][$status]['current'] - $result_new['total']['statuses'][$status]['week']);
             }
+            $result_new['originals'][$item->managerID][$day] += (int) ($item->contracts_original);
+            $result_new['originals'][$item->managerID]['dynamic'] = $result_new['originals'][$item->managerID]['current'] - $result_new['originals'][$item->managerID]['week'];
+            $result_new['total']['originals'][$day] += (int) ($item->contracts_original);
+            $result_new['total']['originals']['dynamic'] = $result_new['total']['originals']['current'] - $result_new['total']['originals']['week'];
         }
 
         $project = PrjHelper::getActiveProject(MkvHelper::getConfig('default_project'));
@@ -346,9 +355,51 @@ class ReportsModelSentInvites extends ListModel
         $sheet->setCellValue("C{$row}", $items['invites']['total']['current'] ?? 0);
         $sheet->setCellValue("D{$row}", $items['invites']['total']['dynamic'] ?? 0);
 
-        //Площади
+
+        //Оригиналы договоров
         $xls->createSheet();
         $xls->setActiveSheetIndex(3);
+        $sheet = $xls->getActiveSheet();
+
+        //Объединение ячеек
+        $merge = ["B1:D1"];
+        foreach ($merge as $cell) $sheet->mergeCells($cell);
+        $sheet->getStyle("A1:D2")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->freezePane("B3");
+
+        //Ширина столбцов
+        $width = ["A" => 20, "B" => 11, "C" => 11, "D" => 11];
+
+        foreach ($width as $col => $value) $sheet->getColumnDimension($col)->setWidth($value);
+        //Заголовки
+        $sheet->setCellValue("A2", JText::sprintf('COM_MKV_HEAD_MANAGER'));
+        $sheet->setCellValue("B1", JText::sprintf('COM_REPORTS_HEAD_CONTRACTS_ORIGINALS'));
+        $sheet->setCellValue("B2", $date_1);
+        $sheet->setCellValue("C2", $date_2);
+        $sheet->setCellValue("D2", JText::sprintf('COM_REPORTS_HEAD_DYNAMIC'));
+
+        $sheet->setTitle(JText::sprintf('COM_REPORTS_HEAD_CONTRACTS_ORIGINALS'));
+
+        //Данные
+        $row = 3; //Строка, с которой начнаются данные
+        //exit(var_dump($items['statuses']['originals']));
+        foreach ($items['statuses']['managers'] as $managerID => $manager) {
+            //if ((int) $item['current'] === 0 && (int) $item['week'] === 0) continue;
+            $sheet->setCellValue("A{$row}", $manager);
+            $sheet->setCellValue("B{$row}", $items['statuses']['originals'][$managerID]['week'] ?? 0);
+            $sheet->setCellValue("C{$row}", $items['statuses']['originals'][$managerID]['current'] ?? 0);
+            $sheet->setCellValue("D{$row}", $items['statuses']['originals'][$managerID]['dynamic'] ?? 0);
+            $row++;
+        }
+        //Итого
+        $sheet->setCellValue("A{$row}", JText::sprintf('COM_REPORTS_HEAD_TOTAL'));
+        $sheet->setCellValue("B{$row}", $items['statuses']['total']['originals']['week'] ?? 0);
+        $sheet->setCellValue("C{$row}", $items['statuses']['total']['originals']['current'] ?? 0);
+        $sheet->setCellValue("D{$row}", $items['statuses']['total']['originals']['dynamic'] ?? 0);
+
+        //Площади
+        $xls->createSheet();
+        $xls->setActiveSheetIndex(4);
         $sheet = $xls->getActiveSheet();
         $sheet->setTitle(JText::sprintf('COM_REPORTS_HEAD_SQUARES'));
         $sheet->getPageSetup()->setFitToHeight(0);
